@@ -1,5 +1,10 @@
 # `trapperkeeper-metrics`
 
+[![Build Status](https://travis-ci.org/puppetlabs/trapperkeeper-metrics.svg?branch=master)](https://travis-ci.org/puppetlabs/trapperkeeper-metrics)
+
+[![Clojars Project](http://clojars.org/puppetlabs/trapperkeeper-metrics/latest-version.svg)](http://clojars.org/puppetlabs/trapperkeeper-metrics)
+
+
 `trapperkeeper-metrics` is a library intended to help make it easier to track
 metrics in other Trapperkeeper applications.  It includes:
 
