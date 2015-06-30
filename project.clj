@@ -18,5 +18,11 @@
                  [org.slf4j/slf4j-api "1.7.7"]
                  [io.dropwizard.metrics/metrics-core "3.1.2"]]
 
+  :deploy-repositories [["releases" {:url "https://clojars.org/repo"
+                                     :username :env/clojars_jenkins_username
+                                     :password :env/clojars_jenkins_password
+                                     :sign-releases false}]]
+
+
   :profiles {:dev {:dependencies [[puppetlabs/trapperkeeper ~tk-version :classifier "test" :exclusions [org.clojure/tools.macro]]
                                   [puppetlabs/kitchensink ~ks-version :classifier "test" :exclusions [slingshot]]]}})
