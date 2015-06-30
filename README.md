@@ -19,11 +19,11 @@ detailed tips on how to write code against it, future plans, etc.), check out th
 ## HTTP Metrics with `comidi`
 
 To get the most value out of this library, use it in concert with
-[comidi](https://github.com/puppetlabs/comidi) (to take advantage of the
-built-in HTTP metrics; see the comidi docs)
+[comidi](https://github.com/puppetlabs/comidi) and
+[trapperkeeper-comidi-metrics](https://github.com/puppetlabs/trapperkeeper-comidi-metrics) (to take advantage of the
+built-in HTTP metrics; see the trapperkeeper-comidi-metrics docs)
 and the [Trapperkeeper Status Service](https://github.com/puppetlabs/trapperkeeper-status)
 (to expose the most useful metrics data from your app via HTTP).
 
-The comidi repo contains a working example app that illustrates how to tie
-everything together.
+The `trapperkeeper-comidi-metrics` repo contains a working example app that illustrates how to tie everything together.
 
