@@ -2,8 +2,8 @@
 
 (ns puppetlabs.metrics
   (:import (com.codahale.metrics MetricRegistry RatioGauge RatioGauge$Ratio
-                                 Gauge Metric Metered)
-           (java.util Timer))
+                                 Gauge Metric Metered Sampling Timer)
+           (java.util.concurrent TimeUnit))
   (:require [schema.core :as schema]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -29,6 +29,22 @@
    metric-name :- schema/Str
    metric :- Metric]
   (.register registry metric-name metric))
+
+(schema/defn mean :- Double
+  "Given a Timer or Histogram object, get the current mean value."
+  [sampling :- Sampling]
+  (.. sampling getSnapshot getMean))
+
+(schema/defn mean-millis :- Long
+  "Given a Timer or Histogram object, get the mean sample time in milliseconds."
+  [sampling :- Sampling]
+  (.toMillis TimeUnit/NANOSECONDS (mean sampling)))
+
+(schema/defn mean-in-unit :- Long
+  "Given a Timer or Histogram object, get the mean sample time in the specified time unit."
+  [sampling :- Sampling
+   time-unit :- TimeUnit]
+  (.convert time-unit (mean sampling) TimeUnit/NANOSECONDS))
 
 (schema/defn ^:always-validate ratio :- RatioGauge
   "Given two functions, return a Ratio metric whose value will be computed

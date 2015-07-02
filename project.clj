@@ -24,5 +24,5 @@
                                      :sign-releases false}]]
 
 
-  :profiles {:dev {:dependencies [[puppetlabs/trapperkeeper ~tk-version :classifier "test" :exclusions [org.clojure/tools.macro]]
-                                  [puppetlabs/kitchensink ~ks-version :classifier "test" :exclusions [slingshot]]]}})
+  :profiles {:dev {:dependencies [[puppetlabs/trapperkeeper ~tk-version :classifier "test"]
+                                  [puppetlabs/kitchensink ~ks-version :classifier "test"]]}})
