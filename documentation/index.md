@@ -41,9 +41,9 @@ For example:
     context))
 ```
 
-See the [source code for the sample app](../dev/example/comidi_metrics_web_app.clj)
+See the [source code for the sample app](https://github.com/puppetlabs/trapperkeeper-comidi-metrics/blob/master/dev/example/comidi_metrics_web_app.clj)
 for a working example.  See the utility functions in the `trapperkeeper-metrics`
-[`metrics`](../src/puppetlabs/metrics/metrics.clj) namespace for some helpers
+[`puppetlabs.metrics`](../src/puppetlabs/metrics.clj) namespace for some helpers
 for constructing other kinds of metrics besides just `Timer`.  See the
 [Dropwizard Metrics docs](https://dropwizard.github.io/metrics/3.1.0/) for more
 info about all of the available metrics types and their features.
@@ -59,7 +59,7 @@ For more specific details, see the
 
 ### Utility Functions
 
-The [`metrics`](../src/puppetlabs/metrics/metrics.clj) namespace contains some
+The [`puppetlabs.metrics`](../src/puppetlabs/metrics.clj) namespace contains some
 utility functions for working with metrics.  See the source code and docstrings
 for more detail.  Here are a few bits of basic info:
 
