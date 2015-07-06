@@ -41,7 +41,7 @@ For example:
     context))
 ```
 
-See the [source code for the sample app](../dev/example/comidi_metrics_web_app.clj)
+See the [source code for the sample app](https://github.com/puppetlabs/trapperkeeper-comidi-metrics/blob/master/dev/example/comidi_metrics_web_app.clj)
 for a working example.  See the utility functions in the `trapperkeeper-metrics`
 [`metrics`](../src/puppetlabs/metrics/metrics.clj) namespace for some helpers
 for constructing other kinds of metrics besides just `Timer`.  See the
