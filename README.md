@@ -27,3 +27,8 @@ and the [Trapperkeeper Status Service](https://github.com/puppetlabs/trapperkeep
 
 The `trapperkeeper-comidi-metrics` repo contains a working example app that illustrates how to tie everything together.
 
+#Support
+
+Please log tickets and issues at our [Jira Tracker](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20Trapperkeeper).
+
+
