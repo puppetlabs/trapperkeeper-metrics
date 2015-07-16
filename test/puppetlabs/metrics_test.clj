@@ -23,6 +23,25 @@
         (is (= 1 (count gauges)))
         (is (= "puppetlabs.localhost.foo" (first (.keySet gauges))))))))
 
+(deftest test-mean-utils
+  (let [timer (Timer.)]
+    (time! timer
+      (Thread/sleep 1))
+    (is (= 1 (.getCount timer)))
+    (let [elapsed-nanos (mean timer)
+          elapsed-millis (mean-millis timer)
+          elapsed-in-millis (mean-in-unit timer TimeUnit/MILLISECONDS)
+          elapsed-in-nanos (mean-in-unit timer TimeUnit/NANOSECONDS)]
+      (println "elapsed-in-millis:" elapsed-in-millis)
+      (is (>= elapsed-millis 1))
+      (is (>= elapsed-in-millis 1))
+      (is (<= elapsed-millis 100))
+      (is (<= elapsed-in-millis 100))
+      (is (>= elapsed-nanos (* 1000 1000)))
+      (is (>= elapsed-in-nanos (* 1000 1000)))
+      (is (<= elapsed-nanos (* 1000 1000 100)))
+      (is (<= elapsed-in-nanos (* 1000 1000 100))))))
+
 (deftest test-ratio
   (testing "ratio should create a ratio metric"
     (let [numerator       (atom 4)
@@ -55,6 +74,6 @@
       (time! timer
         (Thread/sleep 1))
       (is (= 1 (.getCount timer)))
-      (let [elapsed (.toMillis TimeUnit/NANOSECONDS (.. timer getSnapshot getMean))]
+      (let [elapsed (mean-millis timer)]
         (is (>= elapsed 1))
         (is (<= elapsed 100))))))
