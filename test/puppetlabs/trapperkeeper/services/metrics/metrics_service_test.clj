@@ -11,7 +11,6 @@
 
 (deftest test-metrics-service
   (testing "Can boot metrics service and access registry"
-    (with-app-with-config app [metrics-service] {:metrics {:enabled true
-                                                           :server-id "localhost"}}
+    (with-app-with-config app [metrics-service] {:metrics {:server-id "localhost"}}
       (let [svc (app/get-service app :MetricsService)]
         (is (instance? MetricRegistry (metrics-protocol/get-metrics-registry svc)))))))

@@ -9,9 +9,6 @@ Here is a sample config file that illustrates the available settings for metrics
 
 ```
 metrics: {
-    # enable or disable the metrics system
-    enabled: true
-
     # a server id that will be used as part of the namespace for metrics produced
     # by this server
     server-id: localhost

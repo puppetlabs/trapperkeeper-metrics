@@ -1,6 +1,7 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-core
   (:import (com.codahale.metrics JmxReporter MetricRegistry))
-  (:require [schema.core :as schema]
+  (:require [clojure.tools.logging :as log]
+            [schema.core :as schema]
             [puppetlabs.kitchensink.core :as ks]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,15 +36,15 @@
 
 (schema/defn initialize :- MetricsServiceContext
   [config :- MetricsConfig]
-  (let [enabled         (ks/to-bool (:enabled config))
+  (let [enabled-given   (contains? config :enabled)
         jmx-config      (get-in config [:reporters :jmx])]
-    (if-not enabled
-      {:registry nil}
-      (let [registry (MetricRegistry.)]
-        (cond-> {:registry registry}
+    (when enabled-given
+      (log/warn "Metrics are now always enabled.  To suppress this warning remove metrics.enabled from your configuration."))
+    (let [registry (MetricRegistry.)]
+      (cond-> {:registry registry}
 
-          (:enabled jmx-config)
-          (assoc :jmx-reporter (jmx-reporter registry jmx-config)))))))
+        (:enabled jmx-config)
+        (assoc :jmx-reporter (jmx-reporter registry jmx-config))))))
 
 (schema/defn stop :- MetricsServiceContext
   [context :- MetricsServiceContext]
