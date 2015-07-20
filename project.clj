@@ -16,7 +16,7 @@
 
                  [org.clojure/tools.logging "0.2.6"]
                  [org.slf4j/slf4j-api "1.7.7"]
-                 [io.dropwizard.metrics/metrics-core "3.1.2"]]
+                 [metrics-clojure "2.5.1"]]
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
                                      :username :env/clojars_jenkins_username

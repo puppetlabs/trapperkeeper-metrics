@@ -1,6 +1,7 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-core
   (:import (com.codahale.metrics JmxReporter MetricRegistry))
   (:require [schema.core :as schema]
+            [metrics.core]
             [puppetlabs.kitchensink.core :as ks]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -39,7 +40,7 @@
         jmx-config      (get-in config [:reporters :jmx])]
     (if-not enabled
       {:registry nil}
-      (let [registry (MetricRegistry.)]
+      (let [registry metrics.core/default-registry]
         (cond-> {:registry registry}
 
           (:enabled jmx-config)
