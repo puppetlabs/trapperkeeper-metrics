@@ -6,13 +6,9 @@
 
 (trapperkeeper/defservice metrics-service
   metrics/MetricsService
-  [[:ConfigService get-in-config]
-   [:WebroutingService add-ring-handler get-route]]
+  [[:ConfigService get-in-config]]
 
   (init [this context]
-    (when (get-in-config [:metrics :reporters :jmx :enabled] false)
-      (add-ring-handler this
-                        (core/build-handler (get-route this))))
     {:registries
      (atom {::default-registry
             (core/initialize (get-in-config [:metrics] {})
@@ -35,4 +31,16 @@
           (tk-services/service-context this)
           registry-key
           domain))))
+
+(trapperkeeper/defservice metrics-webservice
+  [[:ConfigService get-in-config]
+   [:WebroutingService add-ring-handler get-route]]
+
+  (init [this context]
+        (when (get-in-config [:metrics :reporters :jmx :enabled] false)
+          (add-ring-handler this
+                            (core/build-handler (get-route this))))
+        context)
+
+  (stop [this context] context))
 

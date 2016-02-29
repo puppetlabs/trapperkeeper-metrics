@@ -25,13 +25,15 @@
              :reporters {:jmx {:enabled true}}}
    :webserver {:port 8180
                :host "0.0.0.0"}
-   :web-router-service {:puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-service "/metrics"}})
+   :web-router-service {:puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice
+                        "/metrics"}})
 
 (deftest test-metrics-service
   (testing "Can boot metrics service and access registry"
     (with-app-with-config app [jetty9-service/jetty9-service
                                webrouting-service/webrouting-service
-                               metrics-service] metrics-service-config
+                               metrics-service
+                               metrics-webservice] metrics-service-config
       (let [svc (app/get-service app :MetricsService)]
         (is (instance? MetricRegistry (metrics-protocol/get-metrics-registry svc))))
 
