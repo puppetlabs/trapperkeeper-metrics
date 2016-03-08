@@ -2,6 +2,12 @@
   (:import (com.codahale.metrics JmxReporter MetricRegistry))
   (:require [clojure.tools.logging :as log]
             [schema.core :as schema]
+            [ring.middleware.defaults :as ring-defaults]
+            [puppetlabs.comidi :as comidi]
+            [puppetlabs.trapperkeeper.services.metrics.ringutils
+             :as ringutils]
+            [puppetlabs.trapperkeeper.services.metrics.metrics-utils
+             :as metrics-utils]
             [puppetlabs.kitchensink.core :as ks]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -18,36 +24,77 @@
    (schema/optional-key :enabled)   schema/Bool
    (schema/optional-key :reporters) ReportersConfig})
 
-(def MetricsServiceContext
+(def RegistryContext
   {:registry (schema/maybe MetricRegistry)
-   (schema/optional-key :jmx-reporter) JmxReporter})
+   :jmx-reporter (schema/maybe JmxReporter)})
+
+(def MetricsServiceContext
+  {:registries (schema/atom {schema/Any RegistryContext})})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Private
 
-(defn jmx-reporter
-  [registry jmx-config]
-  (doto (-> (JmxReporter/forRegistry registry)
-          (.build))
-    (.start)))
+(schema/defn jmx-reporter :- JmxReporter
+  [registry :- MetricRegistry
+   domain :- (schema/maybe schema/Str)]
+  (let [b (JmxReporter/forRegistry registry)]
+    (when-let [^String d domain]
+      (.inDomain b d))
+    (.build b)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
-(schema/defn initialize :- MetricsServiceContext
-  [config :- MetricsConfig]
-  (let [enabled-given   (contains? config :enabled)
-        jmx-config      (get-in config [:reporters :jmx])]
-    (when enabled-given
-      (log/warn "Metrics are now always enabled.  To suppress this warning remove metrics.enabled from your configuration."))
-    (let [registry (MetricRegistry.)]
-      (cond-> {:registry registry}
+(schema/defn initialize :- RegistryContext
+  [config :- MetricsConfig
+   domain :- (schema/maybe schema/Str)]
+  (let [jmx-config (get-in config [:reporters :jmx])
+        registry (MetricRegistry.)]
+    (when (contains? config :enabled)
+      (log/warn (str "Metrics are now always enabled.  "
+                     "To suppress this warning remove "
+                     "metrics.enabled from your configuration.")))
+    {:registry registry
+     :jmx-reporter (when (:enabled jmx-config)
+                     (doto ^JmxReporter (jmx-reporter registry domain)
+                       (.start)))}))
 
-        (:enabled jmx-config)
-        (assoc :jmx-reporter (jmx-reporter registry jmx-config))))))
+(schema/defn get-or-initialize! :- RegistryContext
+  [config :- MetricsConfig
+   {:keys [registries]} :- MetricsServiceContext
+   registry-key :- schema/Keyword
+   domain :- schema/Str]
+  (if-let [metric-reg (get-in @registries [registry-key])]
+    metric-reg
+    (let [reg-context (initialize config domain)]
+      (swap! registries assoc registry-key reg-context)
+      reg-context)))
 
-(schema/defn stop :- MetricsServiceContext
-  [context :- MetricsServiceContext]
+(schema/defn stop :- RegistryContext
+  [context :- RegistryContext]
   (if-let [jmx-reporter (:jmx-reporter context)]
     (.close jmx-reporter))
   context)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Comidi
+
+(defn build-handler [path]
+  (comidi/routes->handler
+   (comidi/wrap-routes
+    (comidi/context path
+        (comidi/context "/v1"
+            (comidi/context "/mbeans"
+              (comidi/GET "" []
+                (fn [req]
+                  (ringutils/json-response 200
+                                           (metrics-utils/mbean-names))))
+              (comidi/GET ["/" [#".*" :names]] []
+                (fn [{:keys [route-params] :as req}]
+                  (let [name (java.net.URLDecoder/decode (:names route-params))]
+                    (if-let [mbean (metrics-utils/get-mbean name)]
+                      (ringutils/json-response 200 mbean)
+                      (ringutils/json-response 404
+                                                (format "No mbean '%s' found" name)))))))))
+    #(ring-defaults/wrap-defaults % ring-defaults/api-defaults))))

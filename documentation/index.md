@@ -23,8 +23,8 @@ The main entry point into the Dropwizard Metrics API is a class called
 [`MetricRegistry`](https://dropwizard.github.io/metrics/3.1.0/apidocs/com/codahale/metrics/MetricRegistry.html).
 
 This class requires some basic initialization, so `trapperkeeper-metrics`
-provides a Trapperkeeper service (`MetricsService`) that manages the life
-cycle of a `MetricRegistry`.  The service includes a function, `get-registry`,
+provides a Trapperkeeper service (`MetricsService`) that manages the life cycle
+of a `MetricRegistry`. The service includes a function, `get-metrics-registry`,
 so that all of your other Trapperkeeper services can access the registry and
 register new metrics with it.
 
@@ -47,6 +47,32 @@ for a working example.  See the utility functions in the `trapperkeeper-metrics`
 for constructing other kinds of metrics besides just `Timer`.  See the
 [Dropwizard Metrics docs](https://dropwizard.github.io/metrics/3.1.0/) for more
 info about all of the available metrics types and their features.
+
+The `get-metrics-registry` also allows you to specify two additional fields,
+`registry-key` and `domain` which allow you to create other registries (besides
+the default given by `(get-metrics-registry)`) and allow you to configure the
+namespace of the reporter for that registry.
+
+```clj
+(defservice my-service
+  [[:MetricsService get-metrics-registry]]
+  (init [this context]
+    (let [default-metrics-registry (get-metrics-registry)
+          my-metrics-registry (get-metrics-registry ::my-registry "my.metrics.domain")
+          ;; This will create the metric
+          ;; `my.metrics.domain:name=puppetlabs.localhost.my-metric`
+          my-metric-name (metrics/host-metric-name "localhost" "my-metric")
+          my-timer (.timer metrics-registry my-metric-name)]
+      (assert (not= default-metrics-registry my-metrics-registry))
+      (metrics/time! my-timer (do-some-work)))
+    context)
+
+  (start [this context]
+    ;; We can retrieve the same metrics-registry later.
+    (let [my-metrics-registry (get-metrics-registry ::my-registry "my.metrics.domain")]
+      (do-some-other-work my-metrics-registry))
+    context))
+```
 
 ### Configuration & Reporters
 
@@ -95,27 +121,77 @@ in subsequent releases.)
 `ratio`, `metered-ratio`, and `gauge` can be used to construct other types of
 Metrics.
 
-## What This Library Does *Not* Do
-
 ### Low-level HTTP API
 
-This library does not (yet?) provide a low-level HTTP API for accessing individual
-metrics.  There are a handful of reasons why we don't have support for this yet:
+To enable the HTTP API for accessing individual metrics add the service to your
+`bootstrap.cfg` and configure the `web-router-service` accordingly:
 
-* In general, it seems like it will probably be more useful to have a pre-defined
-  set of metrics that will be the most useful / meaningful for monitoring or
-  debugging an application, and expose this set via a single HTTP endpoint (e.g.
-  via the Trapperkeeper Status Service), as opposed to the user needing to be
-  aware of the list of interesting metrics and request them individually.
-* PuppetDB already contains an HTTP API for accessing individual metrics.  We
-  wanted to avoid re-inventing that wheel; ideally we'll end up extracting that
-  code from PuppetDB and moving it here, for cases when a low-level HTTP API for
-  accessing individual metrics is important.
-* Since we support sending the metrics data to JMX, there are several existing
-  tools and approaches that can be used to read the data for individual metrics
-  via JMX.  JVisualVM is one example; see
-  [pe-puppetserver-jruby-jmx-client](https://github.com/puppetlabs/pe-puppetserver-jruby-jmx-client)
-  for an example of how to do this from a JRuby script.
+```
+web-router-service {
+  "puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice" : "/metrics"
+}
+```
+
+#### Listing available metrics
+
+##### Request format
+
+To get a list of all available metric names:
+
+* Request `/metrics/v1/mbeans`.
+* Use a `GET` request.
+
+##### Response format
+
+Responses return a JSON object mapping a string to a string:
+
+* The key is the name of a valid MBean.
+* The value is a URI to use for requesting that MBean's attributes.
+
+#### Retrieving a specific metric
+
+##### Request format
+
+To get the attributes of a particular metric:
+
+* Request `/metrics/v1/mbeans/<name>`, where `<name>` is something that was
+  returned in the list of available metrics specified above.
+* Use a `GET` request.
+
+##### Response format
+
+Responses return a JSON object mapping strings to (strings/numbers/Booleans).
+
+For example, using `curl` from localhost:
+
+    curl 'http://localhost:8080/metrics/v1/mbeans/java.lang:type=Memory'
+    {
+      "ObjectPendingFinalizationCount" : 0,
+      "HeapMemoryUsage" : {
+        "committed" : 807403520,
+        "init" : 268435456,
+        "max" : 3817865216,
+        "used" : 129257096
+      },
+      "NonHeapMemoryUsage" : {
+        "committed" : 85590016,
+        "init" : 24576000,
+        "max" : 184549376,
+        "used" : 85364904
+      },
+      "Verbose" : false,
+      "ObjectName" : "java.lang:type=Memory"
+    }
+
+#### Alternatives
+
+Since we support sending the metrics data to JMX, there are several existing
+tools and approaches that can be used to read the data for individual metrics
+via JMX. JVisualVM is one example; see
+[pe-puppetserver-jruby-jmx-client](https://github.com/puppetlabs/pe-puppetserver-jruby-jmx-client)
+for an example of how to do this from a JRuby script.
+
+## What This Library Does *Not* Do
 
 ## Notes for Developers
 
@@ -128,11 +204,6 @@ the `comidi` docs for more info.
 ## In The Future There Will Be Robots
 
 Some ideas for things we might want to add/change in the future:
-
-### Low-level HTTP API
-
-Would very much like to bring over the PuppetDB low-level metrics API and include
-it as another service available with this library.
 
 ### metrics-clojure
 

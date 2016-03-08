@@ -10,16 +10,16 @@
 (deftest test-initialize
   (testing "it logs if :enabled is provided"
     (with-test-logging
-      (let [context (initialize {:server-id "localhost" :enabled false})]
+      (let [context (initialize {:server-id "localhost" :enabled false} nil)]
         (is (logged? #"^Metrics are now always enabled." :warn))
         (is (instance? MetricRegistry (:registry context))))))
   (testing "initializes registry and adds to context"
-    (let [context (initialize {:server-id "localhost"})]
+    (let [context (initialize {:server-id "localhost"} "my.epic.domain")]
       (is (instance? MetricRegistry (:registry context)))
-      (is (not (contains? context :jmx-reporter)))))
+      (is (nil? (:jmx-reporter context)))))
   (testing "enables jmx reporter if configured to do so"
     (let [context (initialize {:server-id "localhost"
                                :reporters
-                               {:jmx {:enabled true}}})]
+                               {:jmx {:enabled true}}} "foo.bar.baz")]
       (is (instance? MetricRegistry (:registry context)))
       (is (instance? JmxReporter (:jmx-reporter context) )))))
