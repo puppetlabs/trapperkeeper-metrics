@@ -61,7 +61,7 @@
 
 (schema/defn get-or-initialize! :- RegistryContext
   [config :- MetricsConfig
-   {:keys [registries] :as context} :- MetricsServiceContext
+   {:keys [registries]} :- MetricsServiceContext
    registry-key :- schema/Keyword
    domain :- schema/Str]
   (if-let [metric-reg (get-in @registries [registry-key])]
@@ -90,11 +90,11 @@
                 (fn [req]
                   (ringutils/json-response 200
                                            (metrics-utils/mbean-names))))
-            (comidi/GET ["/" [#".*" :names]] []
-              (fn [{:keys [route-params] :as req}]
-                (let [name (java.net.URLDecoder/decode (:names route-params))]
-                  (if-let [mbean (metrics-utils/get-mbean name)]
-                    (ringutils/json-response 200 mbean)
-                    (ringutils/json-response 404
-                                              (format "No mbean '%s' found" name)))))))))
+              (comidi/GET ["/" [#".*" :names]] []
+                (fn [{:keys [route-params] :as req}]
+                  (let [name (java.net.URLDecoder/decode (:names route-params))]
+                    (if-let [mbean (metrics-utils/get-mbean name)]
+                      (ringutils/json-response 200 mbean)
+                      (ringutils/json-response 404
+                                                (format "No mbean '%s' found" name)))))))))
     #(ring-defaults/wrap-defaults % ring-defaults/api-defaults))))
