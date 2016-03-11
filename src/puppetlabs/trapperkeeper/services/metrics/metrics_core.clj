@@ -1,6 +1,9 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-core
-  (:import (com.codahale.metrics JmxReporter MetricRegistry))
+  (:import (com.codahale.metrics JmxReporter MetricRegistry)
+           (com.fasterxml.jackson.core JsonParseException))
   (:require [clojure.tools.logging :as log]
+            [clojure.java.io :as io]
+            [cheshire.core :as json]
             [schema.core :as schema]
             [ring.middleware.defaults :as ring-defaults]
             [puppetlabs.comidi :as comidi]
@@ -90,6 +93,32 @@
                 (fn [req]
                   (ringutils/json-response 200
                                            (metrics-utils/mbean-names))))
+
+              (comidi/POST "" []
+                (fn [req]
+                  (try
+                    (let [metrics (with-open [reader (-> req :body io/reader)]
+                                    (json/parse-stream reader true))]
+                      (cond
+                        (seq? metrics)
+                        (ringutils/json-response
+                         200 (map metrics-utils/get-mbean metrics))
+
+                        (string? metrics)
+                        (ringutils/json-response
+                         200 (metrics-utils/get-mbean metrics))
+
+                        (map? metrics)
+                        (ringutils/json-response
+                         200 (ks/mapvals metrics-utils/get-mbean metrics))
+
+                        :else
+                        (ringutils/json-response
+                         400 "metrics request must be a JSON array, string, or object")))
+
+                    (catch JsonParseException e
+                      (ringutils/json-response 400 {:error (str e)})))))
+
               (comidi/GET ["/" [#".*" :names]] []
                 (fn [{:keys [route-params] :as req}]
                   (let [name (java.net.URLDecoder/decode (:names route-params))]

@@ -18,7 +18,7 @@
   ([resp]
    (parse-response resp false))
   ([resp keywordize?]
-   (json/parse-string (slurp (:body resp)) keywordize?)))
+   (-> resp :body slurp (json/parse-string keywordize?))))
 
 (def metrics-service-config
   {:metrics {:server-id "localhost"
@@ -61,4 +61,51 @@
                             "pl.foo.reg:name=puppetlabs.localhost.foo")))
                 body (parse-response resp)]
             (is (= 200 (:status resp)))
-            (is (= {"Value" 2} body))))))))
+            (is (= {"Value" 2} body)))))
+
+
+      (testing "querying multiple metrics via POST should work"
+        (let [svc (app/get-service app :MetricsService)
+              registry (metrics-protocol/get-metrics-registry svc
+                                                              ::my-other-reg
+                                                              "pl.other.reg")]
+          (metrics/register registry
+                            (metrics/host-metric-name "localhost" "foo")
+                            (metrics/gauge 2))
+          (metrics/register registry
+                            (metrics/host-metric-name "localhost" "bar")
+                            (metrics/gauge 500))
+
+          (let [resp (http-client/post
+                      "http://localhost:8180/metrics/v1/mbeans"
+                      {:body (json/generate-string
+                              ["pl.other.reg:name=puppetlabs.localhost.foo"
+                               "pl.other.reg:name=puppetlabs.localhost.bar"])})
+                body (parse-response resp)]
+            (is (= 200 (:status resp)))
+            (is (= [{"Value" 2} {"Value" 500}] body)))
+
+          (let [resp (http-client/post
+                      "http://localhost:8180/metrics/v1/mbeans"
+                      {:body (json/generate-string
+                              {:foo "pl.other.reg:name=puppetlabs.localhost.foo"
+                               :bar "pl.other.reg:name=puppetlabs.localhost.bar"})})
+                body (parse-response resp)]
+            (is (= 200 (:status resp)))
+            (is (= {"foo" {"Value" 2}
+                    "bar" {"Value" 500}} body)))
+
+          (let [resp (http-client/post
+                      "http://localhost:8180/metrics/v1/mbeans"
+                      {:body (json/generate-string
+                              "pl.other.reg:name=puppetlabs.localhost.foo")})
+                body (parse-response resp)]
+            (is (= 200 (:status resp)))
+            (is (= {"Value" 2} body)))
+
+          (let [resp (http-client/post
+                      "http://localhost:8180/metrics/v1/mbeans"
+                      {:body "{\"malformed json"})
+                body (slurp (:body resp))]
+            (is (= 400 (:status resp)))
+            (is (re-find #"Unexpected end-of-input" body))))))))
