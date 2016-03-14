@@ -62,12 +62,11 @@
 (schema/defn get-or-initialize! :- RegistryContext
   [config :- MetricsConfig
    {:keys [registries]} :- MetricsServiceContext
-   registry-key :- schema/Keyword
    domain :- schema/Str]
-  (if-let [metric-reg (get-in @registries [registry-key])]
+  (if-let [metric-reg (get-in @registries [domain])]
     metric-reg
     (let [reg-context (initialize config domain)]
-      (swap! registries assoc registry-key reg-context)
+      (swap! registries assoc domain reg-context)
       reg-context)))
 
 (schema/defn stop :- RegistryContext

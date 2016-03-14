@@ -39,7 +39,7 @@
 
       (let [svc (app/get-service app :MetricsService)]
         (is (instance? MetricRegistry
-                       (metrics-protocol/get-metrics-registry svc ::my-reg "pl.foo.reg"))))
+                       (metrics-protocol/get-metrics-registry svc "pl.foo.reg"))))
 
       (testing "returns latest status for all services"
         (let [resp (http-client/get "http://localhost:8180/metrics/v1/mbeans")
@@ -51,7 +51,7 @@
 
       (testing "register should add a metric to the registry"
         (let [svc (app/get-service app :MetricsService)
-              registry (metrics-protocol/get-metrics-registry svc ::my-reg "pl.foo.reg")]
+              registry (metrics-protocol/get-metrics-registry svc "pl.foo.reg")]
           (metrics/register registry
                             (metrics/host-metric-name "localhost" "foo")
                             (metrics/gauge 2))
