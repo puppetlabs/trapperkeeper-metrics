@@ -58,7 +58,7 @@ namespace of the reporter for that registry.
   [[:MetricsService get-metrics-registry]]
   (init [this context]
     (let [default-metrics-registry (get-metrics-registry)
-          my-metrics-registry (get-metrics-registry ::my-registry "my.metrics.domain")
+          my-metrics-registry (get-metrics-registry "my.metrics.domain")
           ;; This will create the metric
           ;; `my.metrics.domain:name=puppetlabs.localhost.my-metric`
           my-metric-name (metrics/host-metric-name "localhost" "my-metric")
@@ -69,7 +69,7 @@ namespace of the reporter for that registry.
 
   (start [this context]
     ;; We can retrieve the same metrics-registry later.
-    (let [my-metrics-registry (get-metrics-registry ::my-registry "my.metrics.domain")]
+    (let [my-metrics-registry (get-metrics-registry "my.metrics.domain")]
       (do-some-other-work my-metrics-registry))
     context))
 ```

@@ -10,7 +10,7 @@
 
   (init [this context]
     {:registries
-     (atom {::default-registry
+     (atom {"default"
             (core/initialize (get-in-config [:metrics] {})
                              nil)})})
 
@@ -22,14 +22,13 @@
 
   (get-metrics-registry [this]
     (-> @(:registries (tk-services/service-context this))
-        ::default-registry
+        (get "default")
         :registry))
 
-  (get-metrics-registry [this registry-key domain]
+  (get-metrics-registry [this domain]
     (:registry
       (core/get-or-initialize! (get-in-config [:metrics] {})
           (tk-services/service-context this)
-          registry-key
           domain))))
 
 (trapperkeeper/defservice metrics-webservice
