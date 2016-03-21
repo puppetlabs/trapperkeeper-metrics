@@ -148,7 +148,31 @@ Responses return a JSON object mapping a string to a string:
 * The key is the name of a valid MBean.
 * The value is a URI to use for requesting that MBean's attributes.
 
-#### Retrieving a specific metric
+#### Retrieving multiple metrics
+
+##### Request format
+
+To get a the attributes for multiple metrics at the same time:
+
+* Request `/metrics/v1/mbeans`.
+* Use a `POST` request.
+* Use a request body which is either a JSON object whose values are metric
+  names, JSON array of metric names or a JSON string of a metric name.
+
+##### Response format
+
+The response format, though always JSON, depends on the request format:
+
+* Requests with a JSON object will return the a JSON object where the values of
+  the original object have been transformed into the Mbeans' attributes for the
+  metric names.
+* Requests with a JSON array will return the a JSON array where the items of the
+  original array have been transformed into the Mbeans' attributes for the
+  metric names.
+* Requests with a JSON string will return the a JSON object of the Mbean's
+  attributes for the given metric name.
+
+#### Retrieving an specific metric
 
 ##### Request format
 
