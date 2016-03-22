@@ -66,9 +66,7 @@
 
       (testing "querying multiple metrics via POST should work"
         (let [svc (app/get-service app :MetricsService)
-              registry (metrics-protocol/get-metrics-registry svc
-                                                              ::my-other-reg
-                                                              "pl.other.reg")]
+              registry (metrics-protocol/get-metrics-registry svc "pl.other.reg")]
           (metrics/register registry
                             (metrics/host-metric-name "localhost" "foo")
                             (metrics/gauge 2))
