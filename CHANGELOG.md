@@ -1,3 +1,11 @@
+## 0.2.0
+
+This is a feature release.
+
+* Add the ability to configure multiple metrics registries
+* Add a new metrics-server service (ported from the PuppetDB `/metrics` API) for
+  querying JMX metrics
+
 ## 0.1.2
 
 This is a feature release.
