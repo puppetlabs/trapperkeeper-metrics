@@ -1,7 +1,7 @@
 (def ks-version "1.2.0")
 (def tk-version "1.2.0")
 
-(defproject puppetlabs/trapperkeeper-metrics "0.2.0-SNAPSHOT"
+(defproject puppetlabs/trapperkeeper-metrics "0.2.0"
   :description "Trapperkeeper Metrics Service"
   :url "http://github.com/puppetlabs/trapperkeeper-metrics"
 
