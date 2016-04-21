@@ -18,6 +18,7 @@
 
                  [puppetlabs/kitchensink ~ks-version]
                  [puppetlabs/trapperkeeper ~tk-version]
+                 [puppetlabs/ring-middleware "0.2.2" :exclusions [ring]]
 
                  [ring/ring-core "1.4.0"]
 
