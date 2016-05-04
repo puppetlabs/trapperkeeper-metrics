@@ -7,8 +7,7 @@
             [schema.core :as schema]
             [ring.middleware.defaults :as ring-defaults]
             [puppetlabs.comidi :as comidi]
-            [puppetlabs.trapperkeeper.services.metrics.ringutils
-             :as ringutils]
+            [puppetlabs.ring-middleware.core :as ringutils]
             [puppetlabs.trapperkeeper.services.metrics.metrics-utils
              :as metrics-utils]
             [puppetlabs.kitchensink.core :as ks]))
