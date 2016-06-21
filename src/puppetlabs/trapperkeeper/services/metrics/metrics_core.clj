@@ -10,7 +10,8 @@
             [puppetlabs.ring-middleware.core :as ringutils]
             [puppetlabs.trapperkeeper.services.metrics.metrics-utils
              :as metrics-utils]
-            [puppetlabs.kitchensink.core :as ks]))
+            [puppetlabs.kitchensink.core :as ks]
+            [puppetlabs.i18n.core :as i18n :refer [trs tru]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Schemas
@@ -53,9 +54,9 @@
   (let [jmx-config (get-in config [:reporters :jmx])
         registry (MetricRegistry.)]
     (when (contains? config :enabled)
-      (log/warn (str "Metrics are now always enabled.  "
-                     "To suppress this warning remove "
-                     "metrics.enabled from your configuration.")))
+      (log/warn (format "%s  %s"
+                        (trs "Metrics are now always enabled.")
+                        (trs "To suppress this warning remove metrics.enabled from your configuration."))))
     {:registry registry
      :jmx-reporter (when (:enabled jmx-config)
                      (doto ^JmxReporter (jmx-reporter registry domain)
@@ -87,11 +88,10 @@
     (comidi/context path
         (comidi/context "/v1"
             (comidi/context "/mbeans"
-              (comidi/GET "" []
-                (fn [req]
-                  (ringutils/json-response 200
-                                           (metrics-utils/mbean-names))))
-
+                (comidi/GET "" []
+                  (fn [req]
+                    (ringutils/json-response 200
+                                             (metrics-utils/mbean-names))))
               (comidi/POST "" []
                 (fn [req]
                   (try
@@ -112,7 +112,7 @@
 
                         :else
                         (ringutils/json-response
-                         400 "metrics request must be a JSON array, string, or object")))
+                         400 (tru "metrics request must be a JSON array, string, or object"))))
 
                     (catch JsonParseException e
                       (ringutils/json-response 400 {:error (str e)})))))
@@ -123,5 +123,5 @@
                     (if-let [mbean (metrics-utils/get-mbean name)]
                       (ringutils/json-response 200 mbean)
                       (ringutils/json-response 404
-                                                (format "No mbean '%s' found" name)))))))))
-    #(ring-defaults/wrap-defaults % ring-defaults/api-defaults))))
+                                               (tru "No mbean ''{0}'' found" name)))))))))
+    (comp i18n/locale-negotiator #(ring-defaults/wrap-defaults % ring-defaults/api-defaults)))))

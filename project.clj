@@ -39,7 +39,10 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [org.slf4j/slf4j-api "1.7.13"]
                  [io.dropwizard.metrics/metrics-core "3.1.2"]
-                 [puppetlabs/comidi "0.3.1"]]
+                 [puppetlabs/comidi "0.3.1"]
+                 [puppetlabs/i18n "0.4.1"]]
+
+  :plugins [[puppetlabs/i18n "0.4.0"]]
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
                                      :username :env/clojars_jenkins_username
