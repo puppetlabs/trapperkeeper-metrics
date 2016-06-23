@@ -42,7 +42,7 @@
                  [puppetlabs/comidi "0.3.1"]
                  [puppetlabs/i18n "0.4.1"]]
 
-  :plugins [[puppetlabs/i18n "0.4.0"]]
+  :plugins [[puppetlabs/i18n "0.4.1"]]
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
                                      :username :env/clojars_jenkins_username
