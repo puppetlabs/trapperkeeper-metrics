@@ -35,6 +35,9 @@
                  ;; thus, we need to use exclusions here, even though we'd normally resolve
                  ;; this type of thing by just specifying a fixed dependency version.
                  [ring/ring-defaults "0.1.5" :exclusions [javax.servlet/servlet-api]]
+                 ;; Explicitly reference the correct servlet-api so that downstream
+                 ;; projects will always get it
+                 [javax.servlet/javax.servlet-api "3.1.0"]
 
                  [org.clojure/tools.logging "0.3.1"]
                  [org.slf4j/slf4j-api "1.7.13"]
