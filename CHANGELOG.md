@@ -1,8 +1,8 @@
-## 0.2.1
+## 0.3.0
 
-This is a minor maintenance and bugfix release.
+This is a minor feature, maintenance, and bugfix release.
 
-* Lay groundwork for future i18n work
+* Introduce i18n library and lay groundwork for future i18n work
 * Update project.clj to prefer explicit dependencies instead of implicit transitive dependencies to resolve conflicts
 * Extract common ring utils into puppetlabs/ring-middleware
 
