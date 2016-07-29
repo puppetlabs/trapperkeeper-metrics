@@ -29,7 +29,10 @@
     (:registry
       (core/get-or-initialize! (get-in-config [:metrics] {})
           (tk-services/service-context this)
-          domain))))
+          domain)))
+
+  (initialize-registry-settings [this domain settings]
+    nil))
 
 (trapperkeeper/defservice metrics-webservice
   [[:ConfigService get-in-config]
