@@ -29,7 +29,11 @@
     (:registry
       (core/get-or-initialize! (get-in-config [:metrics] {})
           (tk-services/service-context this)
-          domain))))
+          domain)))
+
+  (initialize-registry-settings [this domain settings]
+   (throw (RuntimeException.
+           "`initialize-registry-settings` is not yet implemented for this service"))))
 
 (trapperkeeper/defservice metrics-webservice
   [[:ConfigService get-in-config]
