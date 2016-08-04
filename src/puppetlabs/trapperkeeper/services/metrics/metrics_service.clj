@@ -32,7 +32,8 @@
           domain)))
 
   (initialize-registry-settings [this domain settings]
-    nil))
+   (throw (RuntimeException.
+           "`initialize-registry-settings` is not yet implemented for this service"))))
 
 (trapperkeeper/defservice metrics-webservice
   [[:ConfigService get-in-config]

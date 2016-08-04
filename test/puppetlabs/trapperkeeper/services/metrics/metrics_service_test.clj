@@ -30,24 +30,34 @@
 
 (deftest test-metrics-service
   (testing "Can boot metrics service and access registry"
-    (with-app-with-config app [jetty9-service/jetty9-service
-                               webrouting-service/webrouting-service
-                               metrics-service
-                               metrics-webservice] metrics-service-config
-      (let [svc (app/get-service app :MetricsService)]
-        (is (instance? MetricRegistry (metrics-protocol/get-metrics-registry svc))))
+    (with-app-with-config
+     app
+     [jetty9-service/jetty9-service
+      webrouting-service/webrouting-service
+      metrics-service
+      metrics-webservice]
+     metrics-service-config
 
-      (let [svc (app/get-service app :MetricsService)]
-        (is (instance? MetricRegistry
-                       (metrics-protocol/get-metrics-registry svc "pl.foo.reg"))))
+     (testing "metrics service functions"
+       (let [svc (app/get-service app :MetricsService)]
+         (testing "`get-metrics-registry` called without domain works"
+           (is (instance? MetricRegistry (metrics-protocol/get-metrics-registry svc))))
 
-      (testing "returns latest status for all services"
-        (let [resp (http-client/get "http://localhost:8180/metrics/v1/mbeans")
-              body (parse-response resp)]
-          (is (= 200 (:status resp)))
-          (doseq [[metric path] body
-                  :let [resp (http-client/get (str "http://localhost:8180/metrics/v1" path))]]
-            (is (= 200 (:status resp))))))
+         (testing "`get-metrics-registry` called with domain works"
+           (is (instance? MetricRegistry
+                          (metrics-protocol/get-metrics-registry svc "pl.foo.reg"))))
+
+         (testing "`initialize-registry-settings` throws an error because it is not yet implemented"
+           (is (thrown? RuntimeException
+                        (metrics-protocol/initialize-registry-settings svc "foo" {"foo" "bar"}))))))
+
+     (testing "returns latest status for all services"
+       (let [resp (http-client/get "http://localhost:8180/metrics/v1/mbeans")
+             body (parse-response resp)]
+         (is (= 200 (:status resp)))
+         (doseq [[metric path] body
+                 :let [resp (http-client/get (str "http://localhost:8180/metrics/v1" path))]]
+           (is (= 200 (:status resp))))))
 
       (testing "register should add a metric to the registry"
         (let [svc (app/get-service app :MetricsService)
