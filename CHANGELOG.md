@@ -1,3 +1,12 @@
+## 0.4.0
+
+This is a feature release.
+
+* Add an `initialize-registry-settings` function to the MetricsService
+ protocol. The implementation of this function in the trapperkeeper-metrics
+ service in this repo is not yet implemented and currently just throws an
+ error.
+
 ## 0.3.0
 
 This is a minor feature, maintenance, and bugfix release.
