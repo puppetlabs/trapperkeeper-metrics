@@ -1,3 +1,9 @@
+## 0.4.1
+
+This is a maintenance release.
+
+* Bump puppetlabs/ring-middleware dependency from 0.3.1 to 1.0.0.
+
 ## 0.4.0
 
 This is a feature release.
