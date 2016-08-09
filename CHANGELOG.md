@@ -1,3 +1,11 @@
+## 0.4.2
+
+This is a bug fix release.
+
+* Don't require JMX to be enabled for the metrics endpoint to work. Now, if
+ the `metrics-webservice` is added to the config, the `/metrics` endpoint
+ will always be registered.
+
 ## 0.4.1
 
 This is a maintenance release.
