@@ -40,10 +40,9 @@
    [:WebroutingService add-ring-handler get-route]]
 
   (init [this context]
-        (when (get-in-config [:metrics :reporters :jmx :enabled] false)
-          (add-ring-handler this
-                            (core/build-handler (get-route this))))
-        context)
+    (add-ring-handler this
+                      (core/build-handler (get-route this)))
+    context)
 
   (stop [this context] context))
 
