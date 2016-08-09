@@ -10,7 +10,8 @@
             [puppetlabs.trapperkeeper.services.webrouting.webrouting-service :as webrouting-service]
             [puppetlabs.trapperkeeper.services.webserver.jetty9-service :as jetty9-service]
             [puppetlabs.trapperkeeper.testutils.bootstrap :refer [with-app-with-config]]
-            [puppetlabs.trapperkeeper.app :as app]))
+            [puppetlabs.trapperkeeper.app :as app]
+            [puppetlabs.kitchensink.core :as ks]))
 
 (use-fixtures :once schema-test/validate-schemas)
 
@@ -117,3 +118,26 @@
                 body (slurp (:body resp))]
             (is (= 400 (:status resp)))
             (is (re-find #"Unexpected end-of-input" body))))))))
+
+(deftest metrics-endpoint-with-jmx-disabled-test
+  (testing "returns data for jvm even when jmx is not enabled"
+    (let [config (assoc-in metrics-service-config [:metrics :reporters :jmx :enabled] false)]
+      (with-app-with-config
+       app
+       [jetty9-service/jetty9-service
+        webrouting-service/webrouting-service
+        metrics-service
+        metrics-webservice]
+       config
+       (testing "returns latest status for all services"
+         (let [resp (http-client/get "http://localhost:8180/metrics/v1/mbeans")
+               body (parse-response resp)]
+           (is (= 200 (:status resp)))
+           (is (not (empty? body)))))
+       (testing "returns Memoory mbean information"
+         (let [resp (http-client/get "http://localhost:8180/metrics/v1/mbeans/java.lang%3Atype%3DMemory")
+               body (parse-response resp)
+               heap-memory (get body "HeapMemoryUsage")]
+           (is (= 200 (:status resp)))
+           (is (= #{"committed" "init" "max" "used"} (ks/keyset heap-memory)))
+           (is (every? #(< 0 %) (vals heap-memory)))))))))
