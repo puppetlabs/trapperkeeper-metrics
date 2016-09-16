@@ -1,4 +1,5 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-service
+  (:import org.jolokia.http.AgentServlet)
   (:require [puppetlabs.trapperkeeper.core :as trapperkeeper]
             [puppetlabs.trapperkeeper.services.protocols.metrics :as metrics]
             [puppetlabs.trapperkeeper.services.metrics.metrics-core :as core]
@@ -37,11 +38,14 @@
 
 (trapperkeeper/defservice metrics-webservice
   [[:ConfigService get-in-config]
-   [:WebroutingService add-ring-handler get-route]]
+   [:WebroutingService add-ring-handler get-route]
+   [:WebserverService add-servlet-handler]]
 
   (init [this context]
     (add-ring-handler this
                       (core/build-handler (get-route this)))
+    ; Mounting v2 here so that a new service isn't required.
+    (add-servlet-handler (AgentServlet.) (str (get-route this) "/v2"))
     context)
 
   (stop [this context] context))
