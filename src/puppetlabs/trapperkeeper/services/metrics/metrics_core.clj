@@ -6,7 +6,9 @@
             [cheshire.core :as json]
             [schema.core :as schema]
             [ring.middleware.defaults :as ring-defaults]
+            [ring.util.request :as requtils]
             [puppetlabs.comidi :as comidi]
+            [puppetlabs.jolokia :as jolokia]
             [puppetlabs.ring-middleware.utils :as ringutils]
             [puppetlabs.trapperkeeper.services.metrics.metrics-utils
              :as metrics-utils]
@@ -44,6 +46,33 @@
     (when-let [^String d domain]
       (.inDomain b d))
     (.build b)))
+
+(defn javafy-params
+  "Normalize a Ring `:params` map to Java `Map<String, String[]>`"
+  [params]
+  (into {}
+        (map
+         (fn [[k v]]
+           [(name k)
+            (into-array String (if (sequential? v) v [v]))])
+         params)))
+
+(defn jolokia-get
+  "Handles a GET request and returns an org.json.simple.JSONObject instance"
+  [handler req]
+  (.handleGetRequest handler
+                     (requtils/request-url req)
+                     (get-in req [:route-params :path])
+                     (javafy-params (get req :query-params))))
+
+(defn jolokia-post
+  "Handles a POST request and returns an org.json.simple.JSONObject instance"
+  [handler req]
+  (.handlePostRequest handler
+                      (requtils/request-url req)
+                      (get req :body)
+                      (requtils/character-encoding req)
+                      (javafy-params (get req :params))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
@@ -83,9 +112,22 @@
 ;;; Comidi
 
 (defn build-handler [path]
+  ;; NOTE: Is this really the right place to create a persistent
+  ;; handler instance? Does it make more sense to create this as
+  ;; part of the service init?
+  (let [jolokia-handler (jolokia/create-handler)]
   (comidi/routes->handler
    (comidi/wrap-routes
     (comidi/context path
+        (comidi/context "/v2"
+          (comidi/GET [[#".*" :path]] []
+            (fn [req]
+              (let [response (jolokia-get jolokia-handler req)]
+                (ringutils/json-response (.get response "status") response))))
+          (comidi/POST "" []
+            (fn [req]
+              (let [response (jolokia-post jolokia-handler req)]
+                (ringutils/json-response (.get response "status") response)))))
         (comidi/context "/v1"
             (comidi/context "/mbeans"
                 (comidi/GET "" []
@@ -124,4 +166,4 @@
                       (ringutils/json-response 200 mbean)
                       (ringutils/json-response 404
                                                (tru "No mbean ''{0}'' found" name)))))))))
-    (comp i18n/locale-negotiator #(ring-defaults/wrap-defaults % ring-defaults/api-defaults)))))
+    (comp i18n/locale-negotiator #(ring-defaults/wrap-defaults % ring-defaults/api-defaults))))))
