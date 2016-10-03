@@ -91,9 +91,6 @@
 (defn create-backend [config logger restrictor]
   (BackendManager. config logger restrictor))
 
-(defn create-handler []
-  (let [config (create-config)
-        logger (create-logger)
-        restrictor (create-restrictor config logger)
-        backend (create-backend config logger restrictor)]
-    (new HttpRequestHandler config backend logger)))
+(defn create-handler
+  [config backend logger]
+  (HttpRequestHandler. config backend logger))

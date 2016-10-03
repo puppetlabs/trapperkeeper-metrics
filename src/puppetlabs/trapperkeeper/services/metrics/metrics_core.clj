@@ -8,7 +8,6 @@
             [ring.middleware.defaults :as ring-defaults]
             [ring.util.request :as requtils]
             [puppetlabs.comidi :as comidi]
-            [puppetlabs.jolokia :as jolokia]
             [puppetlabs.ring-middleware.utils :as ringutils]
             [puppetlabs.trapperkeeper.services.metrics.metrics-utils
              :as metrics-utils]
@@ -111,11 +110,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Comidi
 
-(defn build-handler [path]
-  ;; NOTE: Is this really the right place to create a persistent
-  ;; handler instance? Does it make more sense to create this as
-  ;; part of the service init?
-  (let [jolokia-handler (jolokia/create-handler)]
+(defn build-handler [path jolokia-handler]
   (comidi/routes->handler
    (comidi/wrap-routes
     (comidi/context path
@@ -166,4 +161,4 @@
                       (ringutils/json-response 200 mbean)
                       (ringutils/json-response 404
                                                (tru "No mbean ''{0}'' found" name)))))))))
-    (comp i18n/locale-negotiator #(ring-defaults/wrap-defaults % ring-defaults/api-defaults))))))
+    (comp i18n/locale-negotiator #(ring-defaults/wrap-defaults % ring-defaults/api-defaults)))))
