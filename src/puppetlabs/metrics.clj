@@ -9,7 +9,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
-(schema/defn ^:alwyas-validate host-metric-name :- schema/Str
+(schema/defn ^:always-validate host-metric-name :- schema/Str
   "Given a hostname and a metric name, build a qualified metric name for use with
   Metrics."
   [hostname :- schema/Str
