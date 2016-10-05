@@ -1,5 +1,6 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-service
   (:require [puppetlabs.trapperkeeper.core :as trapperkeeper]
+            [puppetlabs.jolokia :as jolokia]
             [puppetlabs.trapperkeeper.services.protocols.metrics :as metrics]
             [puppetlabs.trapperkeeper.services.metrics.metrics-core :as core]
             [puppetlabs.trapperkeeper.services :as tk-services]))
@@ -40,9 +41,17 @@
    [:WebroutingService add-ring-handler get-route]]
 
   (init [this context]
+    (let [config (jolokia/create-config
+                  {:agent-context (str (get-route this) "/v2")})
+          logger (jolokia/create-logger)
+          restrictor (jolokia/create-restrictor config logger)
+          backend (jolokia/create-backend config logger restrictor)]
+      (assoc context :jolokia-handler
+             (jolokia/create-handler config backend logger))))
+
+  (start [this context]
     (add-ring-handler this
-                      (core/build-handler (get-route this)))
-    context)
-
-  (stop [this context] context))
-
+                      (core/build-handler
+                       (get-route this)
+                       (:jolokia-handler context)))
+    context))

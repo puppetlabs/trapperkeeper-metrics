@@ -6,6 +6,7 @@
             [cheshire.core :as json]
             [schema.core :as schema]
             [ring.middleware.defaults :as ring-defaults]
+            [ring.util.request :as requtils]
             [puppetlabs.comidi :as comidi]
             [puppetlabs.ring-middleware.utils :as ringutils]
             [puppetlabs.trapperkeeper.services.metrics.metrics-utils
@@ -45,6 +46,33 @@
       (.inDomain b d))
     (.build b)))
 
+(defn javafy-params
+  "Normalize a Ring `:params` map to Java `Map<String, String[]>`"
+  [params]
+  (into {}
+        (map
+         (fn [[k v]]
+           [(name k)
+            (into-array String (if (sequential? v) v [v]))])
+         params)))
+
+(defn jolokia-get
+  "Handles a GET request and returns an org.json.simple.JSONObject instance"
+  [handler req]
+  (.handleGetRequest handler
+                     (requtils/request-url req)
+                     (get-in req [:route-params :path])
+                     (javafy-params (get req :query-params))))
+
+(defn jolokia-post
+  "Handles a POST request and returns an org.json.simple.JSONObject instance"
+  [handler req]
+  (.handlePostRequest handler
+                      (requtils/request-url req)
+                      (get req :body)
+                      (requtils/character-encoding req)
+                      (javafy-params (get req :params))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
@@ -82,10 +110,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Comidi
 
-(defn build-handler [path]
+(defn build-handler [path jolokia-handler]
   (comidi/routes->handler
    (comidi/wrap-routes
     (comidi/context path
+        (comidi/context "/v2"
+          (comidi/GET [[#".*" :path]] []
+            (fn [req]
+              (let [response (jolokia-get jolokia-handler req)]
+                (ringutils/json-response (.get response "status") response))))
+          (comidi/POST "" []
+            (fn [req]
+              (let [response (jolokia-post jolokia-handler req)]
+                (ringutils/json-response (.get response "status") response)))))
         (comidi/context "/v1"
             (comidi/context "/mbeans"
                 (comidi/GET "" []
