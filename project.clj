@@ -14,7 +14,8 @@
                  [commons-codec "1.9"]
                  [org.clojure/tools.macro "0.1.5"]
                  [org.clojure/tools.reader "1.0.0-alpha1"]
-                 [prismatic/schema "1.1.0"]
+                 [org.clojure/tools.cli "0.3.4"]
+                 [prismatic/schema "1.1.1"]
                  [slingshot "0.12.2"]
                  [commons-io "2.4"]
                  [ring/ring-servlet "1.4.0"]
@@ -22,6 +23,7 @@
 
                  [puppetlabs/kitchensink ~ks-version]
                  [puppetlabs/trapperkeeper ~tk-version]
+                 [puppetlabs/trapperkeeper-authorization "0.7.0"]
                  [puppetlabs/ring-middleware "1.0.0"]
 
                  [ring/ring-core "1.4.0"]
@@ -44,6 +46,7 @@
                  [io.dropwizard.metrics/metrics-core "3.1.2"]
                  [org.jolokia/jolokia-core "1.3.5"]
                  [puppetlabs/comidi "0.3.1"]
+                 [puppetlabs/trapperkeeper-webserver-jetty9 "1.3.1" :exclusions [clj-time]]
                  [puppetlabs/i18n "0.4.1"]]
 
   :plugins [[puppetlabs/i18n "0.4.1"]]
@@ -56,4 +59,7 @@
   :profiles {:dev {:dependencies [[puppetlabs/http-client "0.5.0" :exclusions [commons-io]]
                                   [puppetlabs/trapperkeeper ~tk-version :classifier "test"]
                                   [puppetlabs/trapperkeeper-webserver-jetty9 "1.3.1" :exclusions [clj-time]]
-                                  [puppetlabs/kitchensink ~ks-version :classifier "test"]]}})
+                                  [puppetlabs/kitchensink ~ks-version :classifier "test"]]}}
+
+  :main puppetlabs.trapperkeeper.main
+  )
