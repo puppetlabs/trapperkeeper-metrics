@@ -11,7 +11,9 @@
             [puppetlabs.trapperkeeper.services.webserver.jetty9-service :as jetty9-service]
             [puppetlabs.trapperkeeper.testutils.bootstrap :refer [with-app-with-config]]
             [puppetlabs.trapperkeeper.app :as app]
-            [puppetlabs.kitchensink.core :as ks]))
+            [puppetlabs.kitchensink.core :as ks]
+            [puppetlabs.trapperkeeper.services.authorization.authorization-service
+             :as authorization-service]))
 
 (use-fixtures :once schema-test/validate-schemas)
 
@@ -27,7 +29,13 @@
    :webserver {:port 8180
                :host "0.0.0.0"}
    :web-router-service {:puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice
-                        "/metrics"}})
+                        "/metrics"}
+   :authorization {:version 1
+                   :rules [{:match-request {:path "/"
+                                            :type "path"}
+                            :allow-unauthenticated true
+                            :name "allow all"
+                            :sort-order 500}]}})
 
 (deftest test-metrics-service
   (testing "Can boot metrics service and access registry"
@@ -35,6 +43,7 @@
      app
      [jetty9-service/jetty9-service
       webrouting-service/webrouting-service
+      authorization-service/authorization-service
       metrics-service
       metrics-webservice]
      metrics-service-config
@@ -126,6 +135,7 @@
        app
        [jetty9-service/jetty9-service
         webrouting-service/webrouting-service
+        authorization-service/authorization-service
         metrics-service
         metrics-webservice]
        config
