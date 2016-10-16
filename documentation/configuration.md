@@ -21,5 +21,21 @@ metrics: {
             enabled: true
         }
     }
+
+    metrics-webservice: {
+        jolokia: {
+            # Enable or disable the Jolokia-based metrics/v2 endpoint.
+            # Default is true.
+            enabled: false
+
+            # Configure any of the settings listed at:
+            #   https://jolokia.org/reference/html/agents.html#war-agent-installation
+            servlet-init-params: {
+              # Specify a custom security policy:
+              #  https://jolokia.org/reference/html/security.html
+              policyLocation: "file:///etc/puppetlabs/<service name>/jolokia-access.xml"
+            }
+        }
+    }
 }
 ```
