@@ -44,15 +44,17 @@
 (def MetricsServiceContext
   {:registries (schema/atom {schema/Any RegistryContext})})
 
+(def Keyword-or-Str (schema/if keyword? schema/Keyword schema/Str))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Private
 
 (schema/defn jmx-reporter :- JmxReporter
   [registry :- MetricRegistry
-   domain :- (schema/maybe schema/Str)]
+   domain :- (schema/maybe schema/Keyword)]
   (let [b (JmxReporter/forRegistry registry)]
-    (when-let [^String d domain]
-      (.inDomain b d))
+    (when domain
+      (.inDomain b (name domain)))
     (.build b)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -60,8 +62,9 @@
 
 (schema/defn initialize :- RegistryContext
   [config :- MetricsConfig
-   domain :- (schema/maybe schema/Str)]
-  (let [jmx-config (get-in config [:reporters :jmx])
+   domain :- (schema/maybe Keyword-or-Str)]
+  (let [domain (keyword domain)
+        jmx-config (get-in config [:reporters :jmx])
         registry (MetricRegistry.)]
     (when (contains? config :enabled)
       (log/warn (format "%s  %s"
@@ -75,12 +78,13 @@
 (schema/defn get-or-initialize! :- RegistryContext
   [config :- MetricsConfig
    {:keys [registries]} :- MetricsServiceContext
-   domain :- schema/Str]
-  (if-let [metric-reg (get-in @registries [domain])]
-    metric-reg
-    (let [reg-context (initialize config domain)]
-      (swap! registries assoc domain reg-context)
-      reg-context)))
+   domain :- Keyword-or-Str]
+  (let [domain (keyword domain)]
+    (if-let [metric-reg (get @registries domain)]
+      metric-reg
+      (let [reg-context (initialize config domain)]
+        (swap! registries assoc domain reg-context)
+        reg-context))))
 
 (schema/defn stop :- RegistryContext
   [context :- RegistryContext]
