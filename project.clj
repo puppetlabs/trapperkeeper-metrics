@@ -1,58 +1,47 @@
-(def ks-version "1.3.0")
-(def tk-version "1.4.0")
-
 (defproject puppetlabs/trapperkeeper-metrics "0.4.3-SNAPSHOT"
   :description "Trapperkeeper Metrics Service"
   :url "http://github.com/puppetlabs/trapperkeeper-metrics"
 
+  :min-lein-version "2.7.1"
+
   :pedantic? :abort
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :parent-project {:coords [puppetlabs/clj-parent "0.2.4"]
+                   :inherit [:managed-dependencies]}
 
-                 ;; begin version conflict resolution dependencies
-                 [clj-time "0.11.0"]
-                 [commons-codec "1.9"]
-                 [org.clojure/tools.macro "0.1.5"]
-                 [org.clojure/tools.reader "1.0.0-alpha1"]
-                 [prismatic/schema "1.1.0"]
-                 [slingshot "0.12.2"]
-                 [commons-io "2.4"]
-                 [ring/ring-servlet "1.4.0"]
-                 ;; end version conflict resolution dependencies
+  :dependencies [[org.clojure/clojure]
 
-                 [puppetlabs/kitchensink ~ks-version]
-                 [puppetlabs/trapperkeeper ~tk-version]
-                 [puppetlabs/ring-middleware "1.0.0"]
+                 [prismatic/schema]
 
-                 [ring/ring-core "1.4.0"]
+                 [puppetlabs/kitchensink]
+                 [puppetlabs/trapperkeeper]
+                 [puppetlabs/ring-middleware]
 
-                 [cheshire "5.6.1"]
-                 [org.clojure/java.jmx "0.3.1"]
-                 ;; ring-defaults brings in a bad, old version of the servlet-api, which
-                 ;; now has a new artifact name (javax.servlet/javax.servlet-api).  If we
-                 ;; don't exclude the old one here, they'll both be brought in, and consumers
-                 ;; will be subject to the whims of which one shows up on the classpath first.
-                 ;; thus, we need to use exclusions here, even though we'd normally resolve
-                 ;; this type of thing by just specifying a fixed dependency version.
-                 [ring/ring-defaults "0.1.5" :exclusions [javax.servlet/servlet-api]]
+                 [ring/ring-core]
+
+                 [cheshire]
+                 [org.clojure/java.jmx]
+                 [ring/ring-defaults]
                  ;; Explicitly reference the correct servlet-api so that downstream
                  ;; projects will always get it
                  [javax.servlet/javax.servlet-api "3.1.0"]
 
-                 [org.clojure/tools.logging "0.3.1"]
-                 [org.slf4j/slf4j-api "1.7.13"]
+                 [org.clojure/tools.logging]
+                 [org.slf4j/slf4j-api]
                  [io.dropwizard.metrics/metrics-core "3.1.2"]
-                 [puppetlabs/comidi "0.3.1"]
-                 [puppetlabs/i18n "0.4.1"]]
+                 [puppetlabs/comidi]
+                 [puppetlabs/i18n]]
 
-  :plugins [[puppetlabs/i18n "0.4.1"]]
+  :plugins [[puppetlabs/i18n "0.4.3"]
+            [lein-parent "0.3.1"]]
+
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
                                      :username :env/clojars_jenkins_username
                                      :password :env/clojars_jenkins_password
                                      :sign-releases false}]]
 
-  :profiles {:dev {:dependencies [[puppetlabs/http-client "0.5.0" :exclusions [commons-io]]
-                                  [puppetlabs/trapperkeeper ~tk-version :classifier "test"]
-                                  [puppetlabs/trapperkeeper-webserver-jetty9 "1.3.1" :exclusions [clj-time]]
-                                  [puppetlabs/kitchensink ~ks-version :classifier "test"]]}})
+  :profiles {:dev {:dependencies [[puppetlabs/http-client]
+                                  [puppetlabs/trapperkeeper :classifier "test"]
+                                  [puppetlabs/trapperkeeper-webserver-jetty9]
+                                  [puppetlabs/kitchensink :classifier "test"]]}})
