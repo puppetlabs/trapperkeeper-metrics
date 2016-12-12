@@ -17,17 +17,18 @@
                  [puppetlabs/trapperkeeper]
                  [puppetlabs/ring-middleware]
 
-                 [ring/ring-core]
-
                  [cheshire]
                  [org.clojure/java.jmx]
-                 [ring/ring-defaults]
-                 ;; Explicitly reference the correct servlet-api so that downstream
-                 ;; projects will always get it
-                 [javax.servlet/javax.servlet-api "3.1.0"]
+
+                 ;; ring-defaults brings in a bad, old version of the servlet-api, which
+                 ;; now has a new artifact name (javax.servlet/javax.servlet-api).  If we
+                 ;; don't exclude the old one here, they'll both be brought in, and consumers
+                 ;; will be subject to the whims of which one shows up on the classpath first.
+                 ;; thus, we need to use exclusions here, even though we'd normally resolve
+                 ;; this type of thing by just specifying a fixed dependency version.
+                 [ring/ring-defaults nil :exclusions [javax.servlet/servlet-api]]
 
                  [org.clojure/tools.logging]
-                 [org.slf4j/slf4j-api]
                  [io.dropwizard.metrics/metrics-core "3.1.2"]
                  [puppetlabs/comidi]
                  [puppetlabs/i18n]]
