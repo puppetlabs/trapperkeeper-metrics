@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Jolokia API access policy.
+     Docs: https://jolokia.org/reference/html/security.html -->
+<restrict>
+
+  <!-- Empty test policy. Allows full access. -->
+
+</restrict>

@@ -10,6 +10,8 @@
             [puppetlabs.ring-middleware.utils :as ringutils]
             [puppetlabs.trapperkeeper.services.metrics.metrics-utils
              :as metrics-utils]
+            [puppetlabs.trapperkeeper.services.metrics.jolokia
+             :as jolokia]
             [puppetlabs.kitchensink.core :as ks]
             [puppetlabs.i18n.core :as i18n :refer [trs tru]]))
 
@@ -19,13 +21,21 @@
 (def JmxReporterConfig
   {:enabled schema/Bool})
 
+(def JolokiaApiConfig
+  {(schema/optional-key :enabled) schema/Bool
+   (schema/optional-key :servlet-init-params) jolokia/JolokiaConfig})
+
 (def ReportersConfig
   {(schema/optional-key :jmx) JmxReporterConfig})
+
+(def WebserviceConfig
+  {(schema/optional-key :jolokia) JolokiaApiConfig})
 
 (def MetricsConfig
   {:server-id                       schema/Str
    (schema/optional-key :enabled)   schema/Bool
-   (schema/optional-key :reporters) ReportersConfig})
+   (schema/optional-key :reporters) ReportersConfig
+   (schema/optional-key :metrics-webservice) WebserviceConfig})
 
 (def RegistryContext
   {:registry (schema/maybe MetricRegistry)

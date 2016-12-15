@@ -29,6 +29,7 @@
                  [org.clojure/tools.logging]
                  [org.slf4j/slf4j-api]
                  [io.dropwizard.metrics/metrics-core "3.1.2"]
+                 [org.jolokia/jolokia-core "1.3.5"]
                  [puppetlabs/comidi]
                  [puppetlabs/i18n]]
 
