@@ -1,3 +1,19 @@
+## 0.5.0
+
+This is a feature release that also contains bug fixes.
+
+* [TK-404](https://tickets.puppetlabs.com/browse/TK-404) - Added a new "v2" API that is based on the [Jolokia](https://jolokia.org) library. Jolokia
+  provides a superset of functionality found in the current "v1" metrics API. Refer to 'document/configureation.md'
+  for more information on setting up Jolokia with Trapperkeeper. The [Jolokia Documentation](https://jolokia.org/documentation.html)
+  has the specifics on the new metrics API.
+
+* [TK-427](https://tickets.puppetlabs.com/browse/TK-427) - Ensure the JSON request is fully parsed before closing the input stream of the request
+
+* Remove explicit ring-core, servlet-api, and slf4j-api deps
+
+* Switch to using lein parent (and puppetlabs/clj-parent) for most dependency versions,
+  which also now requires Leiningen 2.7.1 or greater
+
 ## 0.4.2
 
 This is a bug fix release.
