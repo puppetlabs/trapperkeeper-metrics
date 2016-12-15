@@ -106,7 +106,7 @@
                 (fn [req]
                   (try
                     (let [metrics (with-open [reader (-> req :body io/reader)]
-                                    (json/parse-stream reader true))]
+                                    (doall (json/parse-stream reader true)))]
                       (cond
                         (seq? metrics)
                         (ringutils/json-response
