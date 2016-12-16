@@ -14,9 +14,10 @@
         (is (logged? #"^Metrics are now always enabled." :warn))
         (is (instance? MetricRegistry (:registry context))))))
   (testing "initializes registry and adds to context"
-    (let [context (initialize {:server-id "localhost"} "my.epic.domain")]
-      (is (instance? MetricRegistry (:registry context)))
-      (is (nil? (:jmx-reporter context)))))
+    (doseq [domain ["my.epic.domain" :my.epic.domanin]]
+      (let [context (initialize {:server-id "localhost"} domain)]
+        (is (instance? MetricRegistry (:registry context)))
+        (is (nil? (:jmx-reporter context))))))
   (testing "enables jmx reporter if configured to do so"
     (let [context (initialize {:server-id "localhost"
                                :reporters

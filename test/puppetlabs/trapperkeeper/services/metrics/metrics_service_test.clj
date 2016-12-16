@@ -94,24 +94,25 @@
 
       (testing "register should add a metric to the registry"
         (let [svc (app/get-service app :MetricsService)
-              registry (metrics-protocol/get-metrics-registry svc "pl.foo.reg")]
-          (metrics/register registry
-                            (metrics/host-metric-name "localhost" "foo")
-                            (metrics/gauge 2))
-          (let [resp (http-client/get
-                       (str "http://localhost:8180/metrics/v1/mbeans/"
-                            (codec/url-encode "pl.foo.reg:name=puppetlabs.localhost.foo")))
-                body (parse-response resp)]
-            (is (= 200 (:status resp)))
-            (is (= {"Value" 2} body))))
+              register-and-get-metric (fn [domain metric]
+                                        (metrics/register
+                                          (metrics-protocol/get-metrics-registry svc domain)
+                                          (metrics/host-metric-name "localhost" metric)
+                                          (metrics/gauge 2))
+                                        (http-client/get
+                                          (str "http://localhost:8180/metrics/v1/mbeans/"
+                                                 (codec/url-encode
+                                                  (str (name domain) ":name=puppetlabs.localhost." metric)))))]
 
-          (let [resp (http-client/get
-                       (str "http://localhost:8180/metrics/v2/read/"
-                            (jolokia-encode "pl.foo.reg:name=puppetlabs.localhost.foo")))
-                body (parse-response resp)]
-            (is (= 200 (get body "status")))
-            (is (= {"Value" 2} (get body "value")))))
+          (testing (str "with a keyword domain")
+            (let [resp (register-and-get-metric :pl.test.reg "foo")]
+              (is (= 200 (:status resp)))
+              (is (= {"Value" 2} (parse-response resp)))))
 
+          (testing (str "with a string domain")
+            (let [resp (register-and-get-metric "pl.test.reg" "bar")]
+              (is (= 200 (:status resp)))
+              (is (= {"Value" 2} (parse-response resp)))))))
 
       (testing "querying multiple metrics via POST should work"
         (let [svc (app/get-service app :MetricsService)
