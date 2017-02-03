@@ -1,3 +1,12 @@
+##0.6.0
+
+This is a feature release.
+
+* [TK-433](https://tickets.puppetlabs.com/browse/TK-433) - Add a new
+  `get-server-id` services function.
+* [TK-430](https://tickets.puppetlabs.com/browse/TK-430) - Bump clj-parent to
+  0.3.3 and i18n to 0.6.0
+
 ## 0.5.0
 
 This is a feature release that also contains bug fixes.
