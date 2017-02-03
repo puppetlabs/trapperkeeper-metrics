@@ -11,6 +11,10 @@
      the JMX metric. For example in `foo:name=my-metric`, `foo` is the
      `domain`.")
 
+  (get-server-id
+   [this]
+   "Get the server-id from the `metrics` -> `server-id` part of the config.")
+
   (initialize-registry-settings
    [this domain settings]
    "Allows for specifying settings for a metric registry reporter that don't

@@ -1,5 +1,6 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-service-test
-  (:import (com.codahale.metrics MetricRegistry))
+  (:import (com.codahale.metrics MetricRegistry)
+           (clojure.lang ExceptionInfo))
   (:require [clojure.test :refer :all]
             [cheshire.core :as json]
             [clojure.string :as string]
@@ -14,7 +15,8 @@
             [puppetlabs.trapperkeeper.testutils.bootstrap :refer [with-app-with-config]]
             [puppetlabs.trapperkeeper.testutils.logging :refer [with-test-logging]]
             [puppetlabs.trapperkeeper.app :as app]
-            [puppetlabs.kitchensink.core :as ks]))
+            [puppetlabs.kitchensink.core :as ks]
+            [puppetlabs.trapperkeeper.testutils.logging :as logging]))
 
 (use-fixtures :once schema-test/validate-schemas)
 
@@ -36,6 +38,12 @@
 (def test-resources-dir
   (ks/absolute-path "./dev-resources/puppetlabs/trapperkeeper/services/metrics/metrics_service_test"))
 
+(def services
+  [jetty9-service/jetty9-service
+   webrouting-service/webrouting-service
+   metrics-service
+   metrics-webservice])
+
 (def metrics-service-config
   {:metrics {:server-id "localhost"
              :reporters {:jmx {:enabled true}}}
@@ -44,14 +52,22 @@
    :web-router-service {:puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice
                         "/metrics"}})
 
+(deftest test-metrics-service-error
+  (testing "Metrics service throws an error if missing server-id"
+    (logging/with-test-logging
+     (is (thrown-with-msg?
+          ExceptionInfo
+          #"Input to initialize does not match schema: .*server-id missing-required-key.*"
+          (with-app-with-config
+           app
+           services
+           (dissoc metrics-service-config :metrics)))))))
+
 (deftest test-metrics-service
   (testing "Can boot metrics service and access registry"
     (with-app-with-config
      app
-     [jetty9-service/jetty9-service
-      webrouting-service/webrouting-service
-      metrics-service
-      metrics-webservice]
+     services
      metrics-service-config
 
      (testing "metrics service functions"
@@ -62,6 +78,9 @@
          (testing "`get-metrics-registry` called with domain works"
            (is (instance? MetricRegistry
                           (metrics-protocol/get-metrics-registry svc "pl.foo.reg"))))
+
+         (testing "`get-server-id` works"
+           (is (= "localhost" (metrics-protocol/get-server-id svc))))
 
          (testing "`initialize-registry-settings` throws an error because it is not yet implemented"
            (is (thrown? RuntimeException
