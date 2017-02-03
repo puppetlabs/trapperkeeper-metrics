@@ -63,6 +63,9 @@
            (is (instance? MetricRegistry
                           (metrics-protocol/get-metrics-registry svc "pl.foo.reg"))))
 
+         (testing "`get-server-id` works"
+           (is (= "localhost" (metrics-protocol/get-server-id svc))))
+
          (testing "`initialize-registry-settings` throws an error because it is not yet implemented"
            (is (thrown? RuntimeException
                         (metrics-protocol/initialize-registry-settings svc "foo" {"foo" "bar"}))))))

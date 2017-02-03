@@ -32,6 +32,9 @@
           (tk-services/service-context this)
           domain)))
 
+  (get-server-id [this]
+    (get-in-config [:metrics :server-id]))
+
   (initialize-registry-settings [this domain settings]
    (throw (RuntimeException.
            "`initialize-registry-settings` is not yet implemented for this service"))))
