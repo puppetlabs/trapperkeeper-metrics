@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Puppet <docs@puppet.com>
+# This file is distributed under the same license as the puppetlabs.trapperkeeper_metrics package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: puppetlabs.trapperkeeper_metrics \n"
+"Report-Msgid-Bugs-To: docs@puppet.com\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/puppetlabs/trapperkeeper/services/metrics/metrics_core.clj
+msgid "Metrics are now always enabled."
+msgstr ""
+
+#: src/puppetlabs/trapperkeeper/services/metrics/metrics_core.clj
+msgid ""
+"To suppress this warning remove metrics.enabled from your configuration."
+msgstr ""
+
+#: src/puppetlabs/trapperkeeper/services/metrics/metrics_core.clj
+msgid "metrics request must be a JSON array, string, or object"
+msgstr ""
+
+#: src/puppetlabs/trapperkeeper/services/metrics/metrics_core.clj
+msgid "No mbean ''{0}'' found"
+msgstr ""
