@@ -37,6 +37,8 @@
   :plugins [[puppetlabs/i18n "0.6.0"]
             [lein-parent "0.3.1"]]
 
+  :source-paths  ["src/clj"]
+  :java-source-paths  ["src/java"]
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
                                      :username :env/clojars_jenkins_username
