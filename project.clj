@@ -1,4 +1,4 @@
-(defproject puppetlabs/trapperkeeper-metrics "0.6.0"
+(defproject puppetlabs/trapperkeeper-metrics "0.6.1-SNAPSHOT"
   :description "Trapperkeeper Metrics Service"
   :url "http://github.com/puppetlabs/trapperkeeper-metrics"
 
