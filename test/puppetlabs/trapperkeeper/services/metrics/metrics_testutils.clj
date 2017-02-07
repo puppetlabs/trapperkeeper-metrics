@@ -1,4 +1,4 @@
-(ns puppetlabs.enterprise.services.metrics.pe-metrics-testutils
+(ns puppetlabs.trapperkeeper.services.metrics.metrics-testutils
   (:import (com.codahale.metrics.graphite GraphiteSender))
   (:require [schema.core :as schema]))
 
