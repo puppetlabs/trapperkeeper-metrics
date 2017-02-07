@@ -1,8 +1,17 @@
-package com.puppetlabs.enterprise;
+package com.puppetlabs.trapperkeeper.metrics;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.Clock;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metered;
+import com.codahale.metrics.MetricFilter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.ScheduledReporter;
+import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.Timer;
 import com.codahale.metrics.graphite.Graphite;
-import com.codahale.metrics.graphite.GraphiteReporter;
 import com.codahale.metrics.graphite.GraphiteSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,24 +24,24 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A reporter which publishes metric values to a Graphite server.
- * A modified version of {@link GraphiteReporter}, which sends a reduced set of statistics
+ * A modified version of {@link com.codahale.metrics.graphite.GraphiteReporter}, which sends a reduced set of statistics
  * for {@link Timer} and {@link Histogram} metrics
  *
  * @see <a href="http://graphite.wikidot.com/">Graphite - Scalable Realtime Graphing</a>
  */
-public class PEGraphiteReporter extends ScheduledReporter {
+public class GraphiteReporter extends ScheduledReporter {
     /**
-     * Returns a new {@link Builder} for {@link PEGraphiteReporter}.
+     * Returns a new {@link Builder} for {@link GraphiteReporter}.
      *
      * @param registry the registry to report
-     * @return a {@link Builder} instance for a {@link PEGraphiteReporter}
+     * @return a {@link Builder} instance for a {@link GraphiteReporter}
      */
     public static Builder forRegistry(MetricRegistry registry) {
         return new Builder(registry);
     }
 
     /**
-     * A builder for {@link PEGraphiteReporter} instances. Defaults to not using a prefix, using the
+     * A builder for {@link GraphiteReporter} instances. Defaults to not using a prefix, using the
      * default clock, converting rates to events/second, converting durations to milliseconds, and
      * not filtering metrics.
      */
@@ -109,27 +118,27 @@ public class PEGraphiteReporter extends ScheduledReporter {
         }
 
         /**
-         * Builds a {@link PEGraphiteReporter} with the given properties, sending metrics using the
+         * Builds a {@link GraphiteReporter} with the given properties, sending metrics using the
          * given {@link GraphiteSender}.
          *
          * Present for binary compatibility
          *
          * @param graphite a {@link Graphite}
-         * @return a {@link PEGraphiteReporter}
+         * @return a {@link GraphiteReporter}
          */
-        public PEGraphiteReporter build(Graphite graphite) {
+        public GraphiteReporter build(Graphite graphite) {
             return build((GraphiteSender) graphite);
         }
 
         /**
-         * Builds a {@link PEGraphiteReporter} with the given properties, sending metrics using the
+         * Builds a {@link GraphiteReporter} with the given properties, sending metrics using the
          * given {@link GraphiteSender}.
          *
          * @param graphite a {@link GraphiteSender}
-         * @return a {@link PEGraphiteReporter}
+         * @return a {@link GraphiteReporter}
          */
-        public PEGraphiteReporter build(GraphiteSender graphite) {
-            return new PEGraphiteReporter(registry,
+        public GraphiteReporter build(GraphiteSender graphite) {
+            return new GraphiteReporter(registry,
                     graphite,
                     clock,
                     prefix,
@@ -139,13 +148,13 @@ public class PEGraphiteReporter extends ScheduledReporter {
         }
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PEGraphiteReporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphiteReporter.class);
 
     private final GraphiteSender graphite;
     private final Clock clock;
     private final String prefix;
 
-    private PEGraphiteReporter(MetricRegistry registry,
+    private GraphiteReporter(MetricRegistry registry,
                              GraphiteSender graphite,
                              Clock clock,
                              String prefix,

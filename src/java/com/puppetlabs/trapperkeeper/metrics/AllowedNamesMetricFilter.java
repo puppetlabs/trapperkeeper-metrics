@@ -1,4 +1,4 @@
-package com.puppetlabs.enterprise;
+package com.puppetlabs.trapperkeeper.metrics;
 
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
@@ -6,10 +6,10 @@ import com.codahale.metrics.MetricFilter;
 import java.util.Set;
 
 // Takes in a whitelist of strings to match against
-public class PEMetricFilter implements MetricFilter{
+public class AllowedNamesMetricFilter implements MetricFilter{
     private final Set<String> allowedMetricNames;
 
-    public PEMetricFilter(Set<String> allowedMetricNames){
+    public AllowedNamesMetricFilter(Set<String> allowedMetricNames){
         this.allowedMetricNames = allowedMetricNames;
     }
 

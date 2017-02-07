@@ -1,7 +1,7 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-service-test
   (:import (com.codahale.metrics MetricRegistry JmxReporter)
            (clojure.lang ExceptionInfo)
-           (com.puppetlabs.enterprise PEGraphiteReporter))
+           (com.puppetlabs.trapperkeeper.metrics GraphiteReporter))
   (:require [clojure.test :refer :all]
             [cheshire.core :as json]
             [clojure.string :as string]
@@ -453,7 +453,7 @@
 
                 (is (every? #(instance? MetricRegistry %)
                             (map :registry (vals registries))))
-                (is (every? #(instance? PEGraphiteReporter %)
+                (is (every? #(instance? GraphiteReporter %)
                             (map :graphite-reporter (vals (dissoc registries :default)))))
 
                 (is (nil? (get-in registries [:default :graphite-reporter]))))

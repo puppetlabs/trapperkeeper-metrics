@@ -1,6 +1,6 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-core-test
   (:import (com.codahale.metrics MetricRegistry JmxReporter)
-           (com.puppetlabs.enterprise PEGraphiteReporter)
+           (com.puppetlabs.trapperkeeper.metrics GraphiteReporter)
            (clojure.lang ExceptionInfo))
   (:require [clojure.test :refer :all]
             [puppetlabs.trapperkeeper.testutils.logging :refer :all]
@@ -37,7 +37,7 @@
                       core/add-graphite-reporters)
           default-registry (get @(:registries context) :default)]
       (is (instance? MetricRegistry (:registry default-registry)))
-      (is (instance? PEGraphiteReporter (:graphite-reporter default-registry)))
+      (is (instance? GraphiteReporter (:graphite-reporter default-registry)))
       (core/stop default-registry)))
   (testing "does not enable graphite reporter if not configured to do so"
     (let [context (-> utils/test-config
@@ -175,18 +175,18 @@
       (core/get-or-initialize-registry-context context :not-in-config)
       (core/add-graphite-reporters context)
       (testing "adds graphite reporter for registry with graphite enabled"
-        (is (instance? PEGraphiteReporter (get-graphite-reporter :enabled.graphite))))
+        (is (instance? GraphiteReporter (get-graphite-reporter :enabled.graphite))))
       (testing "doesn't add graphite reporter for registry with graphite disabled"
         (is (nil? (get-graphite-reporter :disabled.graphite))))
       (testing (str "adds graphite reporter for registry with default metrics allwowed"
                     " and graphite enabled")
-        (is (instance? PEGraphiteReporter (get-graphite-reporter :enabled.graphite))))
+        (is (instance? GraphiteReporter (get-graphite-reporter :enabled.graphite))))
       (testing (str "doesn't add graphite reporter for registry with default metrics allowed"
                     " but graphite disabled")
         (is (nil? (get-graphite-reporter :disabled.graphite.with-defaults))))
       (testing (str "adds graphite reporter for registry with metrics allowed"
                     " and graphite enabled")
-        (is (instance? PEGraphiteReporter
+        (is (instance? GraphiteReporter
                        (get-graphite-reporter :enabled.graphite.with.metrics-allowed))))
       (testing (str "doesn't add graphite reporter for registry with metrics allowed"
                     " but graphite disabled")
@@ -312,7 +312,7 @@
     (testing "returns empty set when there is no registry config"
       (is (= #{} (core/get-metrics-allowed {:server-id "localhost"} {} :not-in-config))))))
 
-(deftest ^:unit pe-metrics-filter-match-test
+(deftest ^:unit allowed-names-metrics-filter-match-test
   ; Wrap .matches so nil doesn't have to be passed every time
   (let [matches (fn [metric-filter name] (.matches metric-filter name nil))]
     (let [metrics-allowed #{"foo"

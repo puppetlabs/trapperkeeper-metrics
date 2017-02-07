@@ -1,7 +1,7 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-core
   (:import (com.codahale.metrics JmxReporter MetricRegistry)
            (com.fasterxml.jackson.core JsonParseException)
-           (com.puppetlabs.enterprise PEGraphiteReporter PEMetricFilter)
+           (com.puppetlabs.trapperkeeper.metrics GraphiteReporter AllowedNamesMetricFilter)
            (java.util.concurrent TimeUnit)
            (java.net InetSocketAddress)
            (com.codahale.metrics.graphite Graphite GraphiteSender))
@@ -85,7 +85,7 @@
 
 (def PERegistryContext
   (merge RegistryContext
-         {(schema/optional-key :graphite-reporter) PEGraphiteReporter}))
+         {(schema/optional-key :graphite-reporter) GraphiteReporter}))
 
 (def DefaultPERegistrySettings
   {:default-metrics-allowed [schema/Str]})
@@ -129,9 +129,9 @@
    metric-names :- [schema/Str]]
   (set (map #(format "%s.%s" prefix %) metric-names)))
 
-(schema/defn build-metric-filter :- PEMetricFilter
+(schema/defn build-metric-filter :- AllowedNamesMetricFilter
   [metrics-allowed :- #{schema/Str}]
-  (PEMetricFilter. metrics-allowed))
+  (AllowedNamesMetricFilter. metrics-allowed))
 
 (schema/defn get-metric-prefix :- schema/Str
   "Determines what the metric prefix should be.
@@ -157,14 +157,14 @@
   [context :- PERegistryContext]
   (dissoc context :graphite-reporter))
 
-(schema/defn build-graphite-reporter :- PEGraphiteReporter
-  "Constructs a PEGraphiteReporter instance for the given registry, with the given allowed metrics,
+(schema/defn build-graphite-reporter :- GraphiteReporter
+  "Constructs a GraphiteReporter instance for the given registry, with the given allowed metrics,
   and using the given graphite-sender"
   [registry :- MetricRegistry
    metrics-allowed :- #{schema/Str}
    graphite-sender :- GraphiteSender]
   (->
-   (PEGraphiteReporter/forRegistry registry)
+   (GraphiteReporter/forRegistry registry)
    (.convertRatesTo (TimeUnit/MILLISECONDS))
    (.convertDurationsTo (TimeUnit/MILLISECONDS))
    (.filter (build-metric-filter metrics-allowed))
