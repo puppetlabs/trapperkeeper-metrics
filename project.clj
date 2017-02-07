@@ -30,6 +30,7 @@
 
                  [org.clojure/tools.logging]
                  [io.dropwizard.metrics/metrics-core "3.1.2"]
+                 [io.dropwizard.metrics/metrics-graphite "3.1.2"]
                  [org.jolokia/jolokia-core "1.3.5"]
                  [puppetlabs/comidi]
                  [puppetlabs/i18n]]
