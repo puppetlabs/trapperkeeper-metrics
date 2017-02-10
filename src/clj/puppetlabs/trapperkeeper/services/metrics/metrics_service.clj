@@ -21,7 +21,7 @@
                             (log/warn "Enabling JMX globally is deprecated;"
                                       "JMX can only be enabled per-registry.")
                             (ks/dissoc-in config [:reporters :jmx :enabled])))]
-     (schema/validate core/PEMetricsConfig metrics-config)
+     (schema/validate core/MetricsConfig metrics-config)
      (log/debug "Creating metrics registries")
      (core/create-initial-service-context metrics-config)))
 

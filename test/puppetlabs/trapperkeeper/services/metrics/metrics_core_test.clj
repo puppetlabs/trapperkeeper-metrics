@@ -11,23 +11,35 @@
 
 (use-fixtures :once schema-test/validate-schemas)
 
-(deftest test-initialize
+(deftest test-initialize-registry-context
   (testing "it logs if :enabled is provided"
     (with-test-logging
-      (let [context (core/initialize {:server-id "localhost" :enabled false} nil)]
+      (let [context (core/initialize-registry-context {:server-id "localhost" :enabled false} nil)]
         (is (logged? #"^Metrics are now always enabled." :warn))
         (is (instance? MetricRegistry (:registry context))))))
   (testing "initializes registry and adds to context"
     (doseq [domain ["my.epic.domain" :my.epic.domanin]]
-      (let [context (core/initialize {:server-id "localhost"} domain)]
+      (let [context (core/initialize-registry-context {:server-id "localhost"} domain)]
         (is (instance? MetricRegistry (:registry context)))
         (is (nil? (:jmx-reporter context))))))
   (testing "enables jmx reporter if configured to do so"
-    (let [context (core/initialize {:server-id "localhost"
-                               :reporters
-                               {:jmx {:enabled true}}} "foo.bar.baz")]
+    (let [context (core/initialize-registry-context
+                   {:server-id "localhost"
+                    :registries
+                    {:foo.bar.baz
+                     {:reporters
+                      {:jmx {:enabled true}}}}} "foo.bar.baz")]
       (is (instance? MetricRegistry (:registry context)))
-      (is (instance? JmxReporter (:jmx-reporter context) )))))
+      (is (instance? JmxReporter (:jmx-reporter context)))))
+  (testing "does not enable jmx reporter if configured to not do so"
+    (let [context (core/initialize-registry-context
+                   {:server-id "localhost"
+                    :registries
+                    {:foo.bar.baz
+                     {:reporters
+                      {:jmx {:enabled false}}}}} "foo.bar.baz")]
+      (is (instance? MetricRegistry (:registry context)))
+      (is (nil? (:jmx-reporter context))))))
 
 (deftest test-lifecycle
   (testing "enables graphite reporter if configured to do so"
@@ -46,30 +58,6 @@
           default-registry (get @(:registries context) :default)]
       (is (instance? MetricRegistry (:registry default-registry)))
       (is (nil? (:graphite-reporter default-registry))))))
-
-(deftest pe-config->oss-config-test
-  (testing "pe-config->oss-config function"
-    (let [config (utils/build-config-with-registries
-                  {:foo {:metrics-allowed ["foo" "bar"]
-                         :reporters {:graphite {:enabled true}}}
-                   :jmx-enabled {:reporters {:jmx {:enabled true}}}
-                   :jmx-disabled {:reporters {:jmx {:enabled false}}}})]
-      (testing "disables jmx if registry not in config"
-        (is (= {:server-id "localhost"
-                :reporters {:jmx {:enabled false}}}
-               (core/pe-config->oss-config config :not.in.the.config))))
-      (testing "disables jmx if jmx not mentioned in config"
-        (is (= {:server-id "localhost"
-                :reporters {:jmx {:enabled false}}}
-               (core/pe-config->oss-config config :foo))))
-      (testing "enables jmx if enabled in the config"
-        (is (= {:server-id "localhost"
-                :reporters {:jmx {:enabled true}}}
-               (core/pe-config->oss-config config :jmx-enabled))))
-      (testing "disables jmx if disabled in the config"
-        (is (= {:server-id "localhost"
-                :reporters {:jmx {:enabled false}}}
-               (core/pe-config->oss-config config :jmx-disabled)))))))
 
 (deftest get-graphite-config-test
   (testing "get-graphite-config function works with `reporters` section"

@@ -29,24 +29,8 @@
   {(schema/optional-key :enabled) schema/Bool
    (schema/optional-key :servlet-init-params) jolokia/JolokiaConfig})
 
-(def ReportersConfig
-  {(schema/optional-key :jmx) JmxReporterConfig})
-
 (def WebserviceConfig
   {(schema/optional-key :jolokia) JolokiaApiConfig})
-
-(def MetricsConfig
-  {:server-id                       schema/Str
-   (schema/optional-key :enabled)   schema/Bool
-   (schema/optional-key :reporters) ReportersConfig
-   (schema/optional-key :metrics-webservice) WebserviceConfig})
-
-(def RegistryContext
-  {:registry (schema/maybe MetricRegistry)
-   :jmx-reporter (schema/maybe JmxReporter)})
-
-(def MetricsServiceContext
-  {:registries (schema/atom {schema/Any RegistryContext})})
 
 (def Keyword-or-Str (schema/if keyword? schema/Keyword schema/Str))
 
@@ -63,38 +47,41 @@
   (assoc (ks/mapkeys schema/optional-key BaseGraphiteReporterConfig)
     :enabled schema/Bool))
 
-(def PERegistryReportersConfig
-  (merge ReportersConfig
-         {(schema/optional-key :graphite) GraphiteRegistryReporterConfig}))
+(def RegistryReportersConfig
+  {(schema/optional-key :jmx) JmxReporterConfig
+   (schema/optional-key :graphite) GraphiteRegistryReporterConfig})
 
-(def PERegistryConfig
+(def RegistryConfig
   {(schema/optional-key :metrics-allowed) [schema/Str]
    (schema/optional-key :metric-prefix) schema/Str
-   (schema/optional-key :reporters) PERegistryReportersConfig})
+   (schema/optional-key :reporters) RegistryReportersConfig})
 
-(def PERegistriesConfig
-  {schema/Any PERegistryConfig})
+(def RegistriesConfig
+  {schema/Any RegistryConfig})
 
-(def PEReportersConfig
+(def ReportersConfig
   {(schema/optional-key :graphite) BaseGraphiteReporterConfig})
 
-(def PEMetricsConfig
-  (merge MetricsConfig
-         {(schema/optional-key :registries) PERegistriesConfig
-          (schema/optional-key :reporters) PEReportersConfig}))
+(def MetricsConfig
+  {:server-id                       schema/Str
+   (schema/optional-key :enabled)   schema/Bool
+   (schema/optional-key :registries) RegistriesConfig
+   (schema/optional-key :reporters) ReportersConfig
+   (schema/optional-key :metrics-webservice) WebserviceConfig})
 
-(def PERegistryContext
-  (merge RegistryContext
-         {(schema/optional-key :graphite-reporter) GraphiteReporter}))
+(def RegistryContext
+  {:registry (schema/maybe MetricRegistry)
+   :jmx-reporter (schema/maybe JmxReporter)
+   (schema/optional-key :graphite-reporter) GraphiteReporter})
 
-(def DefaultPERegistrySettings
+(def DefaultRegistrySettings
   {:default-metrics-allowed [schema/Str]})
 
-(def PEMetricsServiceContext
-  {:registries (schema/atom {schema/Any PERegistryContext})
+(def MetricsServiceContext
+  {:registries (schema/atom {schema/Any RegistryContext})
    :can-update-registry-settings? schema/Bool
-   :registry-settings (schema/atom {schema/Any DefaultPERegistrySettings})
-   :metrics-config PEMetricsConfig})
+   :registry-settings (schema/atom {schema/Any DefaultRegistrySettings})
+   :metrics-config MetricsConfig})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Private
@@ -107,11 +94,13 @@
       (.inDomain b (name domain)))
     (.build b)))
 
-(schema/defn initialize :- RegistryContext
+(schema/defn initialize-registry-context :- RegistryContext
+  "Create initial registry context. This will include a MetricsRegistry and a JMX reporter, but not
+a Graphite reporter."
   [config :- MetricsConfig
    domain :- (schema/maybe Keyword-or-Str)]
   (let [domain (keyword domain)
-        jmx-config (get-in config [:reporters :jmx])
+        jmx-config (get-in config [:registries domain :reporters :jmx])
         registry (MetricRegistry.)]
     (when (contains? config :enabled)
       (log/warn (format "%s  %s"
@@ -136,26 +125,11 @@
 (schema/defn get-metric-prefix :- schema/Str
   "Determines what the metric prefix should be.
   If a metric-prefix is set in the config, we use that. Else default to the server-id"
-  [pe-metrics-config :- PEMetricsConfig
+  [metrics-config :- MetricsConfig
    domain :- schema/Keyword]
-  (if-let [metric-prefix (get-in pe-metrics-config [:registries domain :metric-prefix])]
+  (if-let [metric-prefix (get-in metrics-config [:registries domain :metric-prefix])]
     metric-prefix
-    (format "puppetlabs.%s" (:server-id pe-metrics-config))))
-
-(schema/defn pe-config->oss-config :- MetricsConfig
-  [config :- PEMetricsConfig
-   domain :- schema/Keyword]
-  (-> config
-      ;; TODO: this is a hack to convert from pe-tk-metrics' config to tk-metrics'. In the future,
-      ;; we hope to update tk-metrics to enable jmx per-registry and remove this hack. See TK-393.
-      (assoc-in [:reporters :jmx :enabled]
-                (get-in config [:registries domain :reporters :jmx :enabled] false))
-      (dissoc :registries)
-      (ks/dissoc-in [:reporters :graphite])))
-
-(schema/defn pe-context->oss-context :- RegistryContext
-  [context :- PERegistryContext]
-  (dissoc context :graphite-reporter))
+    (format "puppetlabs.%s" (:server-id metrics-config))))
 
 (schema/defn build-graphite-reporter :- GraphiteReporter
   "Constructs a GraphiteReporter instance for the given registry, with the given allowed metrics,
@@ -180,7 +154,7 @@
   (Graphite. (InetSocketAddress. (:host graphite-config)
                                  (:port graphite-config))))
 
-(schema/defn add-graphite-reporter :- PERegistryContext
+(schema/defn add-graphite-reporter :- RegistryContext
   "Adds a graphite reporter to the given registry context if graphite
   is enabled in the configuration. Starts up a thread which reports the metrics
   to graphite on the interval specified in :update-interval-seconds"
@@ -199,7 +173,7 @@
 
 (schema/defn get-graphite-config :- (schema/maybe GraphiteReporterConfig)
   "Merge together the graphite config for the registry with the global graphite config."
-  [config :- PEMetricsConfig
+  [config :- MetricsConfig
    domain :- schema/Keyword]
   (let [reporter-config (get-in config [:reporters :graphite])
         registry-config (get-in config [:registries domain :reporters :graphite])
@@ -215,48 +189,38 @@
   as the metrics-allowed listed in the config file under the `:metrics-allowed` key. Merges these
   lists together and then adds the metrics prefix to them, returning a set of prefixed allowed
   metrics."
-  [pe-metrics-config :- PEMetricsConfig
-   registry-settings :- {schema/Any DefaultPERegistrySettings}
+  [metrics-config :- MetricsConfig
+   registry-settings :- {schema/Any DefaultRegistrySettings}
    domain :- schema/Keyword]
-  (let [metric-prefix (get-metric-prefix pe-metrics-config domain)
+  (let [metric-prefix (get-metric-prefix metrics-config domain)
         default-metrics-allowed (get-in registry-settings [domain :default-metrics-allowed])
-        configured-metrics-allowed (get-in pe-metrics-config [:registries domain :metrics-allowed])
+        configured-metrics-allowed (get-in metrics-config [:registries domain :metrics-allowed])
         metrics-allowed (concat default-metrics-allowed configured-metrics-allowed)]
     (construct-metric-names metric-prefix metrics-allowed)))
 
-(schema/defn initialize-registry-context :- RegistryContext
-  "Create initial registry context. This will include a MetricsRegistry and a JMX reporter, but not
-  a Graphite reporter."
-  [pe-metrics-config :- PEMetricsConfig
-   domain :- schema/Keyword]
-  (let [oss-metrics-config (pe-config->oss-config pe-metrics-config domain)]
-    (if (= domain :default)
-      (initialize oss-metrics-config nil)
-      (initialize oss-metrics-config (name domain)))))
-
-(schema/defn maybe-add-default-to-config :- PEMetricsConfig
+(schema/defn maybe-add-default-to-config :- MetricsConfig
   "Add a `:default` key with an empty map as the value to the registries config if it is not
   present."
-  [metrics-config :- PEMetricsConfig]
+  [metrics-config :- MetricsConfig]
   (update-in metrics-config [:registries :default] #(if (nil? %) {} %)))
 
 (schema/defn initialize-registries-from-config :- {schema/Any RegistryContext}
   "Read through the config and create a MetricsRegistry (+ JMX reporter if configured) for every
   registry mentioned in it. Also create the default registry if not mentioned in the config. Should
-  be called from `init` of the pe-metrics-service."
-  [metrics-config :- PEMetricsConfig]
+  be called from `init` of the metrics-service."
+  [metrics-config :- MetricsConfig]
   (into {} (map
-            (fn [x] {x (initialize-registry-context metrics-config x)})
+            (fn [x] {x (initialize-registry-context metrics-config (name x))})
             (keys (:registries metrics-config)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
-(schema/defn ^:always-validate add-graphite-reporters :- PEMetricsServiceContext
+(schema/defn ^:always-validate add-graphite-reporters :- MetricsServiceContext
   "Add Graphite reporters to all registries with Graphite enabled in the config, using the
   configured settings for each registry. Returns an updated service context. Should be called from
-  `start` of the pe-metrics-service."
-  [service-context :- PEMetricsServiceContext]
+  `start` of the metrics-service."
+  [service-context :- MetricsServiceContext]
   (let [config (:metrics-config service-context)
         registry-settings @(:registry-settings service-context)]
     (doseq [registry @(:registries service-context)]
@@ -274,12 +238,12 @@
 ;; Note here that the return schema includes registries that could have Graphite reporters. If the
 ;; registry was in the config, then a Graphite reporter could have been configured for it. Any
 ;; registries not in the config will not have Graphite reporters.
-(schema/defn ^:always-validate get-or-initialize-registry-context :- PERegistryContext
+(schema/defn ^:always-validate get-or-initialize-registry-context :- RegistryContext
   "If a registry exists within the service context for a given domain
   already, return it.
   Otherwise initialize a new registry for that domain and return it.
   Modifies the registries atom in the service context to add the new registry"
-  [{:keys [registries metrics-config]} :- PEMetricsServiceContext
+  [{:keys [registries metrics-config]} :- MetricsServiceContext
    domain :- schema/Keyword]
   (if-let [metric-registry-context (get @registries domain)]
     metric-registry-context
@@ -287,11 +251,11 @@
       (swap! registries assoc domain new-registry-context)
       new-registry-context)))
 
-(schema/defn ^:always-validate create-initial-service-context :- PEMetricsServiceContext
-  "Create the initial service context for the pe-metrics-service. Initialize all registries in the
+(schema/defn ^:always-validate create-initial-service-context :- MetricsServiceContext
+  "Create the initial service context for the metrics-service. Initialize all registries in the
   config, add them to the `registries` atom, and include that in the service context map, along with
   an empty atom for `registry-settings` and the metrics config."
-  [metrics-config :- PEMetricsConfig]
+  [metrics-config :- MetricsConfig]
   (let [config-with-default (maybe-add-default-to-config metrics-config)
         registries (initialize-registries-from-config config-with-default)]
     {:registries (atom registries)
@@ -299,17 +263,17 @@
      :registry-settings (atom {})
      :metrics-config config-with-default}))
 
-(schema/defn lock-registry-settings :- PEMetricsServiceContext
+(schema/defn lock-registry-settings :- MetricsServiceContext
   "Switch the `can-update-registry-settings?` boolean to false to show that it is after the `init`
   phase and registry settings can no longer be set."
-  [context :- PEMetricsServiceContext]
+  [context :- MetricsServiceContext]
   (assoc context :can-update-registry-settings? false))
 
-(schema/defn ^:always-validate initialize-registry-settings :- {schema/Any DefaultPERegistrySettings}
+(schema/defn ^:always-validate initialize-registry-settings :- {schema/Any DefaultRegistrySettings}
   "Update the `registry-settings` atom for the given domain. Can only be called once per-domain."
-  [context :- PEMetricsServiceContext
+  [context :- MetricsServiceContext
    domain :- schema/Keyword
-   settings :- DefaultPERegistrySettings]
+   settings :- DefaultRegistrySettings]
   (if (= false (:can-update-registry-settings? context))
     (throw (RuntimeException.
             "Registry settings must be initialized in the `init` phase of the lifecycle."))
@@ -321,15 +285,14 @@
         (swap! registry-settings assoc domain settings)))))
 
 (schema/defn ^:always-validate stop
-  [context :- PERegistryContext]
-  (let [oss-metrics-context (pe-context->oss-context context)]
-    (if-let [jmx-reporter (:jmx-reporter context)]
-      (.close jmx-reporter)))
+  [context :- RegistryContext]
+  (if-let [jmx-reporter (:jmx-reporter context)]
+    (.close jmx-reporter))
   (if-let [graphite-reporter (:graphite-reporter context)]
     (.close graphite-reporter)))
 
 (schema/defn ^:always-validate stop-all
-  [service-context :- PEMetricsServiceContext]
+  [service-context :- MetricsServiceContext]
   (let [registries (:registries service-context)]
     (doseq [[_ metrics-registry] @registries]
       (stop metrics-registry))
