@@ -12,32 +12,21 @@
 (use-fixtures :once schema-test/validate-schemas)
 
 (deftest test-initialize-registry-context
-  (testing "it logs if :enabled is provided"
-    (with-test-logging
-      (let [context (core/initialize-registry-context {:server-id "localhost" :enabled false} nil)]
-        (is (logged? #"^Metrics are now always enabled." :warn))
-        (is (instance? MetricRegistry (:registry context))))))
   (testing "initializes registry and adds to context"
     (doseq [domain ["my.epic.domain" :my.epic.domanin]]
-      (let [context (core/initialize-registry-context {:server-id "localhost"} domain)]
+      (let [context (core/initialize-registry-context {} domain)]
         (is (instance? MetricRegistry (:registry context)))
         (is (nil? (:jmx-reporter context))))))
   (testing "enables jmx reporter if configured to do so"
     (let [context (core/initialize-registry-context
-                   {:server-id "localhost"
-                    :registries
-                    {:foo.bar.baz
-                     {:reporters
-                      {:jmx {:enabled true}}}}} "foo.bar.baz")]
+                   {:reporters
+                    {:jmx {:enabled true}}} "foo.bar.baz")]
       (is (instance? MetricRegistry (:registry context)))
       (is (instance? JmxReporter (:jmx-reporter context)))))
   (testing "does not enable jmx reporter if configured to not do so"
     (let [context (core/initialize-registry-context
-                   {:server-id "localhost"
-                    :registries
-                    {:foo.bar.baz
-                     {:reporters
-                      {:jmx {:enabled false}}}}} "foo.bar.baz")]
+                   {:reporters
+                    {:jmx {:enabled false}}} "foo.bar.baz")]
       (is (instance? MetricRegistry (:registry context)))
       (is (nil? (:jmx-reporter context))))))
 
@@ -333,7 +322,7 @@
         (is (= "test-prefix" (core/get-metric-prefix config :default)))))))
 
 (deftest graphite-reporter-filter-test
-  (let [registry-context (core/initialize-registry-context utils/test-config :default)
+  (let [registry-context (core/initialize-registry-context nil :default)
         registry (:registry registry-context)
         reported-metrics (atom {})
         metrics-allowed #{"test-histogram" "test-meter" "test-timer"}

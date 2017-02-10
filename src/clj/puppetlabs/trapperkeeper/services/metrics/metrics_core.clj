@@ -64,7 +64,6 @@
 
 (def MetricsConfig
   {:server-id                       schema/Str
-   (schema/optional-key :enabled)   schema/Bool
    (schema/optional-key :registries) RegistriesConfig
    (schema/optional-key :reporters) ReportersConfig
    (schema/optional-key :metrics-webservice) WebserviceConfig})
@@ -97,15 +96,11 @@
 (schema/defn initialize-registry-context :- RegistryContext
   "Create initial registry context. This will include a MetricsRegistry and a JMX reporter, but not
 a Graphite reporter."
-  [config :- MetricsConfig
+  [config :- (schema/maybe RegistryConfig)
    domain :- (schema/maybe Keyword-or-Str)]
   (let [domain (keyword domain)
-        jmx-config (get-in config [:registries domain :reporters :jmx])
+        jmx-config (get-in config [:reporters :jmx])
         registry (MetricRegistry.)]
-    (when (contains? config :enabled)
-      (log/warn (format "%s  %s"
-                        (trs "Metrics are now always enabled.")
-                        (trs "To suppress this warning remove metrics.enabled from your configuration."))))
     {:registry registry
      :jmx-reporter (when (:enabled jmx-config)
                      (doto ^JmxReporter (jmx-reporter registry domain)
@@ -209,9 +204,11 @@ a Graphite reporter."
   registry mentioned in it. Also create the default registry if not mentioned in the config. Should
   be called from `init` of the metrics-service."
   [metrics-config :- MetricsConfig]
-  (into {} (map
-            (fn [x] {x (initialize-registry-context metrics-config (name x))})
-            (keys (:registries metrics-config)))))
+  (let [registries-config (:registries metrics-config)]
+    (into {} (map
+              (fn [x] {x (initialize-registry-context (get registries-config x)
+                                                      (name x))})
+              (keys registries-config)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
@@ -247,7 +244,8 @@ a Graphite reporter."
    domain :- schema/Keyword]
   (if-let [metric-registry-context (get @registries domain)]
     metric-registry-context
-    (let [new-registry-context (initialize-registry-context metrics-config domain)]
+    (let [registry-config (get-in metrics-config [:registries domain])
+          new-registry-context (initialize-registry-context registry-config domain)]
       (swap! registries assoc domain new-registry-context)
       new-registry-context)))
 
