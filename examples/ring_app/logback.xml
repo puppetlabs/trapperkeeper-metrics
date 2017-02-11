@@ -1,0 +1,15 @@
+<configuration scan="true">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %-5p [%c{2}] %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <!-- Uncomment the following loggers to turn on rule-by-rule logging -->
+    <!-- <logger name="puppetlabs.trapperkeeper.authorization.rules" level="TRACE"/> -->
+    <!-- <logger name="puppetlabs.trapperkeeper.services.authorization.authorization-service" level="DEBUG"/> -->
+</configuration>

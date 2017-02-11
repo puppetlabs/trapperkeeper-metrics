@@ -16,6 +16,10 @@ For more detailed information (what this library does and doesn't do, more
 detailed tips on how to write code against it, future plans, etc.), check out the
 [documentation](./documentation/index.md).
 
+## Example code
+
+One example, a Trapperkeeper service which uses the metrics service in conjunction with a Ring handler, is included with this project ([source code](./examples/ring_app/README.md)).
+
 ## HTTP Metrics with `comidi`
 
 To get the most value out of this library, use it in concert with
