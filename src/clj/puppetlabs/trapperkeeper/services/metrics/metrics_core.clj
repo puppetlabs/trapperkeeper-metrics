@@ -94,8 +94,8 @@
     (.build b)))
 
 (schema/defn initialize-registry-context :- RegistryContext
-  "Create initial registry context. This will include a MetricsRegistry and a JMX reporter, but not
-a Graphite reporter."
+  "Create initial registry context. This will include a MetricsRegistry and a
+  JMX reporter, but not a Graphite reporter."
   [config :- (schema/maybe RegistryConfig)
    domain :- (schema/maybe Keyword-or-Str)]
   (let [domain (keyword domain)
@@ -207,7 +207,7 @@ a Graphite reporter."
   (let [registries-config (:registries metrics-config)]
     (into {} (map
               (fn [x] {x (initialize-registry-context (get registries-config x)
-                                                      (name x))})
+                                                      x)})
               (keys registries-config)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
