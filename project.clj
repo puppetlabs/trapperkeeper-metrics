@@ -46,6 +46,8 @@
                                      :password :env/clojars_jenkins_password
                                      :sign-releases false}]]
 
+  :classifiers  [["test" :testutils]]
+
   :profiles {:dev {:aliases {"ring-example"
                              ["trampoline" "run"
                               "-b" "./examples/ring_app/bootstrap.cfg"
@@ -54,7 +56,9 @@
                    :dependencies [[puppetlabs/http-client]
                                   [puppetlabs/trapperkeeper :classifier "test"]
                                   [puppetlabs/trapperkeeper-webserver-jetty9]
-                                  [puppetlabs/kitchensink :classifier "test"]]}}
+                                  [puppetlabs/kitchensink :classifier "test"]]}
+             :testutils {:source-paths ^:replace ["test"]
+                         :java-source-paths ^:replace []}}
 
   :repl-options {:init-ns examples.ring-app.repl}
 
