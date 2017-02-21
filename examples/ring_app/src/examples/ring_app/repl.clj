@@ -1,7 +1,7 @@
 (ns examples.ring-app.repl
   (:require
     [puppetlabs.trapperkeeper.services.metrics.metrics-service
-     :refer [metrics-service metrics-webservice ]]
+     :refer [metrics-service metrics-webservice]]
     [puppetlabs.trapperkeeper.services.webserver.jetty9-service
      :refer [jetty9-service]]
     [puppetlabs.trapperkeeper.services.webrouting.webrouting-service
@@ -9,6 +9,8 @@
     [examples.ring-app.ring-app :refer [count-service]]
     [puppetlabs.trapperkeeper.core :as tk]
     [puppetlabs.trapperkeeper.app :as tka]
+    [puppetlabs.trapperkeeper.bootstrap :as bootstrap]
+    [puppetlabs.trapperkeeper.config :as config]
     [clojure.tools.namespace.repl :refer (refresh)]))
 
 ;; This namespace shows an example of the "reloaded" clojure workflow
@@ -32,33 +34,9 @@
 (defn init []
   (alter-var-root #'system
                   (fn [_] (tk/build-app
-                           [jetty9-service
-                            webrouting-service
-                            metrics-service
-                            metrics-webservice
-                            count-service]
-                           {:global
-                            {:logging-config "./examples/ring_app/logback.xml"}
-                            :webserver {:port 8080}
-                            :web-router-service
-                            {:puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice "/metrics"}
-                            :metrics
-                            {:server-id "localhost"
-                             :registries
-                             {:count-service
-                              {:reporters
-                               {:jmx
-                                {:enabled true}
-                                :graphite
-                                {:enabled false}}}}
-                             :metrics-webservice
-                             {:jolokia
-                              {:enabled true}}
-                             :reporters
-                             {:graphite
-                              {:host "127.0.0.1"
-                               :port 2003
-                               :update-interval-seconds 5}}}})))
+                           (bootstrap/parse-bootstrap-config!
+                            "./examples/ring_app/bootstrap.cfg")
+                           (config/load-config "./examples/ring_app/ring-example.conf"))))
   (alter-var-root #'system tka/init)
   (tka/check-for-errors! system))
 

@@ -50,6 +50,21 @@ For convenience, the application could also be run instead via the
 lein ring-example
 ~~~~
 
+### Running the app from the repl
+
+To startup the sample application from the repl, use the following `lein`
+command while in the root of the trapperkeeper-metrics repo:
+
+~~~~sh
+lein repl
+~~~~
+
+The `repl` prompt should display the namespace of the ring-app example.  Type `(go)` and press enter in order to launch the app:
+
+~~~~sh
+examples.ring-app.repl=> (go)
+~~~~
+
 ### The `bootstrap.cfg` file
 
 The bootstrap config file contains a list of services that trapperkeeper will

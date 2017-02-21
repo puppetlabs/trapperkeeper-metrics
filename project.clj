@@ -56,4 +56,6 @@
                                   [puppetlabs/trapperkeeper-webserver-jetty9]
                                   [puppetlabs/kitchensink :classifier "test"]]}}
 
+  :repl-options {:init-ns examples.ring-app.repl}
+
   :main puppetlabs.trapperkeeper.main)
