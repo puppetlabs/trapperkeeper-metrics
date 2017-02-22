@@ -1,12 +1,5 @@
 (ns examples.ring-app.repl
   (:require
-    [puppetlabs.trapperkeeper.services.metrics.metrics-service
-     :refer [metrics-service metrics-webservice]]
-    [puppetlabs.trapperkeeper.services.webserver.jetty9-service
-     :refer [jetty9-service]]
-    [puppetlabs.trapperkeeper.services.webrouting.webrouting-service
-     :refer [webrouting-service]]
-    [examples.ring-app.ring-app :refer [count-service]]
     [puppetlabs.trapperkeeper.core :as tk]
     [puppetlabs.trapperkeeper.app :as tka]
     [puppetlabs.trapperkeeper.bootstrap :as bootstrap]
