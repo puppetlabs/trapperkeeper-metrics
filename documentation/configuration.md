@@ -46,7 +46,7 @@ metrics: {
             reporters: {
 
                 # enable or disable JMX metrics reporter
-                JMX: {
+                jmx: {
                     enabled: true
                 }
 
