@@ -50,7 +50,7 @@ info about all of the available metrics types and their features.
 
 The `get-metrics-registry` also allows you to specify two additional fields,
 `registry-key` and `domain` which allow you to create other registries (besides
-the default given by `(get-metrics-registry)`) and allow you to configure the
+the default given by `(get-metrics-registry)` and allow you to configure the
 namespace of the reporter for that registry.
 
 ```clj
@@ -73,6 +73,9 @@ namespace of the reporter for that registry.
       (do-some-other-work my-metrics-registry))
     context))
 ```
+
+For more specific details on the service API, see the [`Metrics
+Service` API docs](./api.md).
 
 ### Configuration & Reporters
 

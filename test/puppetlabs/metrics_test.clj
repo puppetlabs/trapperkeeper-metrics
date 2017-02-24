@@ -32,7 +32,6 @@
           elapsed-millis (mean-millis timer)
           elapsed-in-millis (mean-in-unit timer TimeUnit/MILLISECONDS)
           elapsed-in-nanos (mean-in-unit timer TimeUnit/NANOSECONDS)]
-      (println "elapsed-in-millis:" elapsed-in-millis)
       (is (>= elapsed-millis 1))
       (is (>= elapsed-in-millis 1))
       (is (<= elapsed-millis 100))
