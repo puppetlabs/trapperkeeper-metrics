@@ -97,9 +97,8 @@
   "Create initial registry context. This will include a MetricsRegistry and a
   JMX reporter, but not a Graphite reporter."
   [config :- (schema/maybe RegistryConfig)
-   domain :- (schema/maybe Keyword-or-Str)]
-  (let [domain (keyword domain)
-        jmx-config (get-in config [:reporters :jmx])
+   domain :- schema/Keyword]
+  (let [jmx-config (get-in config [:reporters :jmx])
         registry (MetricRegistry.)]
     {:registry registry
      :jmx-reporter (when (:enabled jmx-config)
