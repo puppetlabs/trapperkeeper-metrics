@@ -32,8 +32,6 @@
 (def WebserviceConfig
   {(schema/optional-key :jolokia) JolokiaApiConfig})
 
-(def Keyword-or-Str (schema/if keyword? schema/Keyword schema/Str))
-
 (def BaseGraphiteReporterConfig
   {:host schema/Str
    :port schema/Int

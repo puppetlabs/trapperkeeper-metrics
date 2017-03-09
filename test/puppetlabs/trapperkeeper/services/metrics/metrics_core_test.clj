@@ -13,7 +13,7 @@
 
 (deftest test-initialize-registry-context
   (testing "initializes registry and adds to context"
-    (let [domain :my.epic.domanin
+    (let [domain :my.epic.domain
           context (core/initialize-registry-context {} domain)]
       (is (instance? MetricRegistry (:registry context)))
       (is (nil? (:jmx-reporter context)))))
