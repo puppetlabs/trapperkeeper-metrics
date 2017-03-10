@@ -35,10 +35,10 @@
   (stop [this context]
     (core/stop-all (tk-services/service-context this)))
 
-  (initialize-registry-settings
+  (update-registry-settings
    [this domain settings]
    (let [context (tk-services/service-context this)]
-     (core/initialize-registry-settings context domain settings)))
+     (core/update-registry-settings context domain settings)))
 
   (get-metrics-registry
    [this]

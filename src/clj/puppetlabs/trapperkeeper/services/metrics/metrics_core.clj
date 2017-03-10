@@ -180,7 +180,7 @@
 
 (schema/defn get-metrics-allowed :- #{schema/Str}
   "Get the metrics allowed for the registry. Looks at the metrics-allowed registered for the
-  registry in the registry settings atom using the `initialize-registry-settings` function as well
+  registry in the registry settings atom using the `update-registry-settings` function as well
   as the metrics-allowed listed in the config file under the `:metrics-allowed` key. Merges these
   lists together and then adds the metrics prefix to them, returning a set of prefixed allowed
   metrics."
@@ -267,7 +267,7 @@
   [context :- MetricsServiceContext]
   (assoc context :can-update-registry-settings? false))
 
-(schema/defn ^:always-validate initialize-registry-settings :- {schema/Any DefaultRegistrySettings}
+(schema/defn ^:always-validate update-registry-settings :- {schema/Any DefaultRegistrySettings}
   "Update the `registry-settings` atom for the given domain. If called again for the same domain,
   the new settings will be merged in, and lists such as :default-metrics-allowed, will be concat'd
   together."
