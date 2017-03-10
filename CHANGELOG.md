@@ -1,9 +1,30 @@
 ##1.0.0
 
-This is a major backwards incompatible feature release
+This is a major backwards incompatible feature release.
+The major new feature is support for exporting to graphite. See the
+[documentation](documentation/configuration.md) for details about how to enable
+graphite exporting.
+
+The breaking changes are:
+
+* The `metrics` section of the configuration has changed to allow configuration
+  of jmx and graphite reporters per domain instead of globally. See the
+  [documentation](documentation/configuration.md) for details about the new
+  format.
+* Domains must be specified as keywords instead of strings in the clojure API.
+* `initialize-registry-settings` has been renamed to `update-registry-settings`
+
+Additional changes:
+
+* Allow multiple services to register `default-metrics-allowed` lists through
+  the `update-registry-settings` service function to limit the number of
+  metrics sent to graphite
+  
+Jira Links:
 
 * [TK-361](https://tickets.puppetlabs.com/browse/TK-361) - Move
-  pe-trapperkeeper-metrics metrics code into OSS trapperkeeper-metrics
+  pe-trapperkeeper-metrics code, including graphite exporting, into OSS 
+  trapperkeeper-metrics.
 * [TK-393](https://tickets.puppetlabs.com/browse/TK-393) - Make jmx enabled
   per-registry. Deprecate enabling jmx globally
 * [TK-394](https://tickets.puppetlabs.com/browse/TK-394) - Only accept metrics
