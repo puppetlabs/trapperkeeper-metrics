@@ -1,7 +1,7 @@
 # `MetricsService` API
 
 The `MetricsService` protocol provides two functions: `get-metrics-registry`
-and `initialize-registry-settings`.
+and `update-registry-settings`.
 
 ### `get-metrics-registry`
 
@@ -11,32 +11,34 @@ metrics. If no registry for this domain previously existed, creates the metric
 registry. If no domain is provided, returns the default registry.
 
 Can be called at any time, regardless of if or when
-`initalize-registry-settings` has been called.
+`update-registry-settings` has been called.
 
-### `initialize-registry-settings`
+### `update-registry-settings`
 
 Takes a domain and a map of settings, and registers these settings for the
 domain. Currently, the only available setting is `default-metrics-allowed`,
 which takes a vector of strings.
 
-This function can only be called once per domain. This means if there is more
-than one Trapperkeeper service registering metrics with the same registry,
-only one service can call `initialize-registry-settings`. Either designate a
-service to have this responsibility, or create a separate service to handle
-metrics-related things.
+This function can safely be called multiple times from different Trapperkeeper
+services. Since the only setting is currently `default-metrics-allowed`, each
+call to `update-registry-settings` will append the given
+`default-metrics-allowed` list to the existing list of allowed metrics for that
+domain. This means that different services can add metrics to the allowed list
+that are appropriate for that service, so that no one service needs to know the
+complete list of allowed metrics for the entire TK application 
 
-Must be called during the `init` phase of the service lifecycle, since these
-settings are used to initialize registries and reporters during the metrics
-service's `start` phase.
+Any calls to this function must be called during the `init` phase of the
+service lifecycle, since these settings are used to initialize registries and
+reporters during the metrics service's `start` phase.
 
 Example usage:
 
 ```clojure
 (trapperkeeper/defservice my-service
-  [[:MetricsService get-metrics-registry initialize-registry-settings]]
+  [[:MetricsService get-metrics-registry update-registry-settings]]
   (init
    [this context]
-   (initialize-registry-settings :foo {:default-metrics-allowed ["foo" "foo.bar"])
+   (update-registry-settings :foo {:default-metrics-allowed ["foo" "foo.bar"])
    ...)
   (start
    [this context]

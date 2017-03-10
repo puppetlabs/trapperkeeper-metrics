@@ -28,8 +28,8 @@ list, and 2) the metric names in the `metrics-allowed` section of the config.
 TK application developers who want to have a list of metric names that users
 cannot change (and don't have to worry about and will always be present after
 upgrade) should set these with the `default-metrics-allowed` setting. This is
-done using the [`initialize-registry-settings` service
-function](./api.md#initialize-registry-settings).
+done using the [`update-registry-settings` service
+function](./api.md#update-registry-settings).
 
 The `metrics-allowed` setting in the config allows users to add additional
 metrics (on top of the `default-metrics-allowed`) that they would like to have
