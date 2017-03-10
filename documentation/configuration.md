@@ -26,7 +26,7 @@ metrics: {
     server-id: localhost
 
     registries: {
-        "my-application": {
+        my-application: {
 
             # specify metrics to include in addition to the default list provided.
             # The combination of these two lists will be what gets exported to graphite and

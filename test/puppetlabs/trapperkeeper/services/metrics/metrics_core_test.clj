@@ -13,20 +13,22 @@
 
 (deftest test-initialize-registry-context
   (testing "initializes registry and adds to context"
-    (doseq [domain ["my.epic.domain" :my.epic.domanin]]
-      (let [context (core/initialize-registry-context {} domain)]
-        (is (instance? MetricRegistry (:registry context)))
-        (is (nil? (:jmx-reporter context))))))
+    (let [domain :my.epic.domain
+          context (core/initialize-registry-context {} domain)]
+      (is (instance? MetricRegistry (:registry context)))
+      (is (nil? (:jmx-reporter context)))))
   (testing "enables jmx reporter if configured to do so"
-    (let [context (core/initialize-registry-context
+    (let [domain :foo.bar.baz
+          context (core/initialize-registry-context
                    {:reporters
-                    {:jmx {:enabled true}}} "foo.bar.baz")]
+                    {:jmx {:enabled true}}} domain)]
       (is (instance? MetricRegistry (:registry context)))
       (is (instance? JmxReporter (:jmx-reporter context)))))
   (testing "does not enable jmx reporter if configured to not do so"
-    (let [context (core/initialize-registry-context
+    (let [domain :foo.bar.baz
+          context (core/initialize-registry-context
                    {:reporters
-                    {:jmx {:enabled false}}} "foo.bar.baz")]
+                    {:jmx {:enabled false}}} domain)]
       (is (instance? MetricRegistry (:registry context)))
       (is (nil? (:jmx-reporter context))))))
 

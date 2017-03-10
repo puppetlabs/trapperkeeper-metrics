@@ -32,8 +32,6 @@
 (def WebserviceConfig
   {(schema/optional-key :jolokia) JolokiaApiConfig})
 
-(def Keyword-or-Str (schema/if keyword? schema/Keyword schema/Str))
-
 (def BaseGraphiteReporterConfig
   {:host schema/Str
    :port schema/Int
@@ -77,9 +75,9 @@
   {:default-metrics-allowed [schema/Str]})
 
 (def MetricsServiceContext
-  {:registries (schema/atom {schema/Any RegistryContext})
+  {:registries (schema/atom {schema/Keyword RegistryContext})
    :can-update-registry-settings? schema/Bool
-   :registry-settings (schema/atom {schema/Any DefaultRegistrySettings})
+   :registry-settings (schema/atom {schema/Keyword DefaultRegistrySettings})
    :metrics-config MetricsConfig})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -97,9 +95,8 @@
   "Create initial registry context. This will include a MetricsRegistry and a
   JMX reporter, but not a Graphite reporter."
   [config :- (schema/maybe RegistryConfig)
-   domain :- (schema/maybe Keyword-or-Str)]
-  (let [domain (keyword domain)
-        jmx-config (get-in config [:reporters :jmx])
+   domain :- schema/Keyword]
+  (let [jmx-config (get-in config [:reporters :jmx])
         registry (MetricRegistry.)]
     {:registry registry
      :jmx-reporter (when (:enabled jmx-config)
