@@ -15,7 +15,7 @@
    [this]
    "Get the server-id from the `metrics` -> `server-id` part of the config.")
 
-  (initialize-registry-settings
+  (update-registry-settings
    [this domain settings]
    "Allows for specifying settings for a metric registry reporter that don't
    go into a config file. Must be called during the 'init' phase of a

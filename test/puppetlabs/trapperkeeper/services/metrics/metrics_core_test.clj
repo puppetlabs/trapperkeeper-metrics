@@ -145,11 +145,11 @@
           context (core/create-initial-service-context config)
           get-graphite-reporter (fn [domain]
                                   (get-in @(:registries context) [domain :graphite-reporter]))]
-      (core/initialize-registry-settings
+      (core/update-registry-settings
        context :enabled.graphite.with-defaults {:default-metrics-allowed ["bar"]})
-      (core/initialize-registry-settings
+      (core/update-registry-settings
        context :disabled.graphite.with-defaults {:default-metrics-allowed ["bar"]})
-      (core/initialize-registry-settings
+      (core/update-registry-settings
        context :not-in-config.with-defaults {:default-metrics-allowed ["bar"]})
       (core/get-or-initialize-registry-context context :not-in-config)
       (core/add-graphite-reporters context)
@@ -208,25 +208,23 @@
         (is (instance? JmxReporter (get-in registries [:default :jmx-reporter])))
         (is (nil? (get-in registries [:foo :jmx-reporter])))))))
 
-(deftest initialize-registry-settings-test
+(deftest update-registry-settings-test
   (let [context (core/create-initial-service-context utils/test-config)]
-    (testing "initialize-registry-settings adds settings for a registry"
+    (testing "update-registry-settings adds settings for a registry"
       (is (= {:foo.bar {:default-metrics-allowed ["foo.bar"]}}
-             (core/initialize-registry-settings context
-                                                :foo.bar
-                                                {:default-metrics-allowed ["foo.bar"]}))))
-    (testing "initialize-registry-settings throws an error if it is called after init lifecycle phase"
-      (is (thrown? RuntimeException (core/initialize-registry-settings
+             (core/update-registry-settings context
+                                            :foo.bar
+                                            {:default-metrics-allowed ["foo.bar"]}))))
+    (testing "update-registry-settings appends settings if the settings already exist"
+      (is (= {:foo.bar {:default-metrics-allowed ["foo.bar" "bar.baz"]}}
+             (core/update-registry-settings context
+                                            :foo.bar
+                                            {:default-metrics-allowed ["bar.baz"]}))))
+    (testing "update-registry-settings throws an error if it is called after init lifecycle phase"
+      (is (thrown? RuntimeException (core/update-registry-settings
                                      (core/lock-registry-settings context)
                                      :nope {:default-metrics-allowed ["default"]}))))
-    (testing "initialize-registry-settings throws an error for a registry that already has settings"
-      (core/initialize-registry-settings context
-                                         :error.registry
-                                         {:default-metrics-allowed ["foo.bar"]})
-      (is (thrown? RuntimeException (core/initialize-registry-settings
-                                     context
-                                     :error.registry
-                                     {:default-metrics-allowed ["another"]}))))
+
     ; Make sure all the graphite reporters get shutdown, otherwise they spawn background threads
     (core/stop-all context)))
 

@@ -17,9 +17,8 @@ includes the `count-service-report-me` counter but not the `count-service-dont-r
 counter in its list of `:default-metrics-allowed` for the count service registry:
 
 ~~~~clj
-(initialize-registry-settings :count-service
-                                  {:default-metrics-allowed
-                                   ["count-service-report-me"]})
+(update-registry-settings :count-service
+                          {:default-metrics-allowed ["count-service-report-me"]})
 ~~~~
 
 Metric info for the `count-service-report-me`

@@ -277,12 +277,12 @@
      (testing "Can access server-id"
        (is (= "foo" (metrics-protocol/get-server-id svc)))))))
 
-(deftest initialize-registry-settings-service-function-test
+(deftest update-registry-settings-service-function-test
   (testing "intialize-registry-settings adds settings for a registry"
     (let [service (trapperkeeper/service
-                   [[:MetricsService initialize-registry-settings]]
+                   [[:MetricsService update-registry-settings]]
                    (init [this context]
-                         (initialize-registry-settings :foo.bar {:default-metrics-allowed ["foo.bar"]})
+                         (update-registry-settings :foo.bar {:default-metrics-allowed ["foo.bar"]})
                          context))
           metrics-app (trapperkeeper/build-app [service metrics-service]
                                                {:metrics utils/test-config})
@@ -295,28 +295,11 @@
         (finally
           (app/stop metrics-app)))))
 
-  (testing "initialize-registry-settings throws an error for a registry that already has settings"
+  (testing "update-registry-settings throws an error if called outside `init`"
     (let [service (trapperkeeper/service
-                   [[:MetricsService initialize-registry-settings]]
-                   (init [this context]
-                         (initialize-registry-settings
-                          :error.registry {:default-metrics-allowed ["foo.bar"]})
-                         (initialize-registry-settings
-                          :error.registry {:default-metrics-allowed ["another"]})
-                         context))
-          metrics-app (trapperkeeper/build-app [service metrics-service]
-                                               {:metrics utils/test-config})]
-      (with-test-logging
-       (try
-         (is (thrown? RuntimeException (app/check-for-errors! (app/init metrics-app))))
-         (finally
-           (app/stop metrics-app))))))
-
-  (testing "initialize-registry-settings throws an error if called outside `init`"
-    (let [service (trapperkeeper/service
-                   [[:MetricsService initialize-registry-settings]]
+                   [[:MetricsService update-registry-settings]]
                    (start [this context]
-                          (initialize-registry-settings :nope {:default-metrics-allowed ["fail"]})
+                          (update-registry-settings :nope {:default-metrics-allowed ["fail"]})
                           context))
           metrics-app (trapperkeeper/build-app [service metrics-service]
                                                {:metrics utils/test-config})]
@@ -388,20 +371,20 @@
          :graphite-with-defaults-and-metrics-allowed (merge metrics-allowed graphite-enabled)}
         config {:metrics (utils/build-config-with-registries registries-config)}
         service (trapperkeeper/service
-                 [[:MetricsService get-metrics-registry initialize-registry-settings]]
+                 [[:MetricsService get-metrics-registry update-registry-settings]]
                  (init
                   [this context]
                   (get-metrics-registry :graphite-enabled)
 
                   (get-metrics-registry :graphite-with-default-metrics-allowed)
-                  (initialize-registry-settings :graphite-with-default-metrics-allowed
+                  (update-registry-settings :graphite-with-default-metrics-allowed
                                                 default-metrics-allowed)
 
                   (get-metrics-registry :graphite-with-metrics-allowed)
 
                   ;; shouldn't matter whether `get-metrics-registry` or
-                  ;; `initialize-registry-settings` is called first
-                  (initialize-registry-settings :graphite-with-defaults-and-metrics-allowed
+                  ;; `update-registry-settings` is called first
+                  (update-registry-settings :graphite-with-defaults-and-metrics-allowed
                                                 default-metrics-allowed)
                   (get-metrics-registry :graphite-with-defaults-and-metrics-allowed)
 

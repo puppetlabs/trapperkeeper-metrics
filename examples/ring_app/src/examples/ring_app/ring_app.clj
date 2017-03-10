@@ -5,7 +5,7 @@
               [puppetlabs.trapperkeeper.services :refer [service-context]]))
 
 (defservice count-service
-  [[:MetricsService initialize-registry-settings get-metrics-registry get-server-id]
+  [[:MetricsService update-registry-settings get-metrics-registry get-server-id]
    [:WebserverService add-ring-handler]]
   (init [this context]
     (log/info "Count service starting up")
@@ -26,8 +26,8 @@
           :body (str "Requests made since startup: "
                      (.getCount counter-to-report))})
        "/count"))
-    (initialize-registry-settings :count-service
-                                  {:default-metrics-allowed
-                                   ["count-service-report-me"]})
+    (update-registry-settings :count-service
+                              {:default-metrics-allowed
+                               ["count-service-report-me"]})
 
     context))

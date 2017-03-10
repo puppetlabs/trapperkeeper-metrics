@@ -177,7 +177,7 @@
 
 (schema/defn get-metrics-allowed :- #{schema/Str}
   "Get the metrics allowed for the registry. Looks at the metrics-allowed registered for the
-  registry in the registry settings atom using the `initialize-registry-settings` function as well
+  registry in the registry settings atom using the `update-registry-settings` function as well
   as the metrics-allowed listed in the config file under the `:metrics-allowed` key. Merges these
   lists together and then adds the metrics prefix to them, returning a set of prefixed allowed
   metrics."
@@ -264,20 +264,26 @@
   [context :- MetricsServiceContext]
   (assoc context :can-update-registry-settings? false))
 
-(schema/defn ^:always-validate initialize-registry-settings :- {schema/Any DefaultRegistrySettings}
-  "Update the `registry-settings` atom for the given domain. Can only be called once per-domain."
+(schema/defn ^:always-validate update-registry-settings :- {schema/Any DefaultRegistrySettings}
+  "Update the `registry-settings` atom for the given domain. If called again for the same domain,
+  the new settings will be merged in, and lists such as :default-metrics-allowed, will be concat'd
+  together."
   [context :- MetricsServiceContext
    domain :- schema/Keyword
    settings :- DefaultRegistrySettings]
-  (if (= false (:can-update-registry-settings? context))
+  (when (= false (:can-update-registry-settings? context))
     (throw (RuntimeException.
-            "Registry settings must be initialized in the `init` phase of the lifecycle."))
-    (let [registry-settings (:registry-settings context)]
-      (if (get @registry-settings domain)
-        (throw (RuntimeException.
-                (format "Registry %s has already had settings initialized; can't call more than once."
-                        domain)))
-        (swap! registry-settings assoc domain settings)))))
+            "Registry settings must be initialized in the `init` phase of the lifecycle.")))
+
+  (let [registry-settings (:registry-settings context)
+        deep-merge-fn (fn [first second]
+                        ; first will be nil if no settings exist for this domain,
+                        ; and deep-merge-with doesn't like that
+                        (ks/deep-merge-with concat (or first {}) second))]
+    ; Swap out the atom by updating the value under the specified domain.
+    ; Update using deep-merge-fn to do a deep merge between the existing settings
+    ; and the new settings, concating values together if two keys match
+    (swap! registry-settings update domain deep-merge-fn settings)))
 
 (schema/defn ^:always-validate stop
   [context :- RegistryContext]
