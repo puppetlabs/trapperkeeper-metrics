@@ -75,9 +75,9 @@
   {:default-metrics-allowed [schema/Str]})
 
 (def MetricsServiceContext
-  {:registries (schema/atom {schema/Any RegistryContext})
+  {:registries (schema/atom {schema/Keyword RegistryContext})
    :can-update-registry-settings? schema/Bool
-   :registry-settings (schema/atom {schema/Any DefaultRegistrySettings})
+   :registry-settings (schema/atom {schema/Keyword DefaultRegistrySettings})
    :metrics-config MetricsConfig})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
