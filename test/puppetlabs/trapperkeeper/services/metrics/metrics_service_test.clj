@@ -295,23 +295,6 @@
         (finally
           (app/stop metrics-app)))))
 
-  (testing "initialize-registry-settings throws an error for a registry that already has settings"
-    (let [service (trapperkeeper/service
-                   [[:MetricsService initialize-registry-settings]]
-                   (init [this context]
-                         (initialize-registry-settings
-                          :error.registry {:default-metrics-allowed ["foo.bar"]})
-                         (initialize-registry-settings
-                          :error.registry {:default-metrics-allowed ["another"]})
-                         context))
-          metrics-app (trapperkeeper/build-app [service metrics-service]
-                                               {:metrics utils/test-config})]
-      (with-test-logging
-       (try
-         (is (thrown? RuntimeException (app/check-for-errors! (app/init metrics-app))))
-         (finally
-           (app/stop metrics-app))))))
-
   (testing "initialize-registry-settings throws an error if called outside `init`"
     (let [service (trapperkeeper/service
                    [[:MetricsService initialize-registry-settings]]

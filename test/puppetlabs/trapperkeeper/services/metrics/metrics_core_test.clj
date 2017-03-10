@@ -213,18 +213,16 @@
              (core/initialize-registry-settings context
                                                 :foo.bar
                                                 {:default-metrics-allowed ["foo.bar"]}))))
+    (testing "initialize-registry-settings appends settings if the settings already exist"
+      (is (= {:foo.bar {:default-metrics-allowed ["foo.bar" "bar.baz"]}}
+             (core/initialize-registry-settings context
+                                                :foo.bar
+                                                {:default-metrics-allowed ["bar.baz"]}))))
     (testing "initialize-registry-settings throws an error if it is called after init lifecycle phase"
       (is (thrown? RuntimeException (core/initialize-registry-settings
                                      (core/lock-registry-settings context)
                                      :nope {:default-metrics-allowed ["default"]}))))
-    (testing "initialize-registry-settings throws an error for a registry that already has settings"
-      (core/initialize-registry-settings context
-                                         :error.registry
-                                         {:default-metrics-allowed ["foo.bar"]})
-      (is (thrown? RuntimeException (core/initialize-registry-settings
-                                     context
-                                     :error.registry
-                                     {:default-metrics-allowed ["another"]}))))
+
     ; Make sure all the graphite reporters get shutdown, otherwise they spawn background threads
     (core/stop-all context)))
 
