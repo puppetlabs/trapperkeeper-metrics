@@ -1,3 +1,17 @@
+##1.0.0
+
+This is a major backwards incompatible feature release
+
+* [TK-361](https://tickets.puppetlabs.com/browse/TK-361) - Move
+  pe-trapperkeeper-metrics metrics code into OSS trapperkeeper-metrics
+* [TK-393](https://tickets.puppetlabs.com/browse/TK-393) - Make jmx enabled
+  per-registry. Deprecate enabling jmx globally
+* [TK-394](https://tickets.puppetlabs.com/browse/TK-394) - Only accept metrics
+  domain as keyword instead of string
+* [TK-436](https://tickets.puppetlabs.com/browse/TK-436) - Add support for
+  appending registry settings from multiple services
+
+
 ##0.6.0
 
 This is a feature release.
