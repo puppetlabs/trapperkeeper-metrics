@@ -1,3 +1,9 @@
+## 1.1.0
+
+* [TK-442](https://tickets.puppetlabs.com/browse/TK-442) - Updates to dropwizard
+  from 3.1.2 to 3.2.2. NOTE: This is done by bumping the dependency on clj-parent
+  which also brings in the a new version of tk-jetty9. Java 7 is no longer supported.
+
 ##1.0.0
 
 This is a major backwards incompatible feature release.
