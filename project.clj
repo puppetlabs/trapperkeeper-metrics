@@ -1,4 +1,4 @@
-(defproject puppetlabs/trapperkeeper-metrics "1.0.1-SNAPSHOT"
+(defproject puppetlabs/trapperkeeper-metrics "1.1.0-SNAPSHOT"
   :description "Trapperkeeper Metrics Service"
   :url "http://github.com/puppetlabs/trapperkeeper-metrics"
 
@@ -6,7 +6,7 @@
 
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "0.3.3"]
+  :parent-project {:coords [puppetlabs/clj-parent "1.2.0"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
@@ -29,8 +29,8 @@
                  [ring/ring-defaults nil :exclusions [javax.servlet/servlet-api]]
 
                  [org.clojure/tools.logging]
-                 [io.dropwizard.metrics/metrics-core "3.1.2"]
-                 [io.dropwizard.metrics/metrics-graphite "3.1.2"]
+                 [io.dropwizard.metrics/metrics-core]
+                 [io.dropwizard.metrics/metrics-graphite]
                  [org.jolokia/jolokia-core "1.3.5"]
                  [puppetlabs/comidi]
                  [puppetlabs/i18n]]
