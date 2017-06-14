@@ -1,4 +1,10 @@
-##1.0.0
+## 1.1.0
+
+* [TK-442](https://tickets.puppetlabs.com/browse/TK-442) - Updates dropwizard
+  from 3.1.2 to 3.2.2. NOTE: This is done by bumping the dependency on clj-parent
+  which also brings in a new version of tk-jetty9. Java 7 is no longer supported.
+
+## 1.0.0
 
 This is a major backwards incompatible feature release.
 The major new feature is support for exporting to graphite. See the
@@ -19,7 +25,7 @@ Additional changes:
 * Allow multiple services to register `default-metrics-allowed` lists through
   the `update-registry-settings` service function to limit the number of
   metrics sent to graphite
-  
+
 Jira Links:
 
 * [TK-361](https://tickets.puppetlabs.com/browse/TK-361) - Move
@@ -33,7 +39,7 @@ Jira Links:
   appending registry settings from multiple services
 
 
-##0.6.0
+## 0.6.0
 
 This is a feature release.
 
