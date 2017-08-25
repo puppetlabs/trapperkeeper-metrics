@@ -6,7 +6,7 @@
 
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "1.2.0"]
+  :parent-project {:coords [puppetlabs/clj-parent "1.3.2"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
@@ -20,13 +20,7 @@
                  [cheshire]
                  [org.clojure/java.jmx]
 
-                 ;; ring-defaults brings in a bad, old version of the servlet-api, which
-                 ;; now has a new artifact name (javax.servlet/javax.servlet-api).  If we
-                 ;; don't exclude the old one here, they'll both be brought in, and consumers
-                 ;; will be subject to the whims of which one shows up on the classpath first.
-                 ;; thus, we need to use exclusions here, even though we'd normally resolve
-                 ;; this type of thing by just specifying a fixed dependency version.
-                 [ring/ring-defaults nil :exclusions [javax.servlet/servlet-api]]
+                 [ring/ring-defaults]
 
                  [org.clojure/tools.logging]
                  [io.dropwizard.metrics/metrics-core]
