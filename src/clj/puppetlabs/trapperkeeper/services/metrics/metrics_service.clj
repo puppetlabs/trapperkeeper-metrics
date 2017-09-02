@@ -68,7 +68,7 @@
                         jolokia/create-servlet-config)
             ;; NOTE: Normally, these route and server lookups would be done by
             ;; WebroutingService/add-servlet-handler, but that doesn't properly
-            ;; mount sub-paths at the moment (TK-420). So we explictly compute
+            ;; mount sub-paths at the moment (TK-420). So we explicitly compute
             ;; these items and use WebserverService/add-servlet-handler instead.
             route (str (get-route this) "/v2")
             server (get-server this)
