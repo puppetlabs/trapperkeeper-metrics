@@ -25,7 +25,7 @@
                  [org.clojure/tools.logging]
                  [io.dropwizard.metrics/metrics-core]
                  [io.dropwizard.metrics/metrics-graphite]
-                 [org.jolokia/jolokia-core "1.5.0"]
+                 [org.jolokia/jolokia-core "1.6.0"]
                  [puppetlabs/comidi]
                  [puppetlabs/i18n]]
 
