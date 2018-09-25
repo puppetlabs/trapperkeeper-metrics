@@ -1,3 +1,9 @@
+## 1.2.0
+
+* Update Jolokia to 1.6.0. This was a security release of Jolokia, though we
+  do not use the affected features of Jolokia it is still recommended to
+  upgrade.
+
 ## 1.1.0
 
 * [TK-442](https://tickets.puppetlabs.com/browse/TK-442) - Updates dropwizard
