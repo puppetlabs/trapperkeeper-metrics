@@ -1,14 +1,8 @@
 language: clojure
 lein: 2.7.1
-jdk:
-- oraclejdk8
+matrix:
+  include:
+    - jdk: openjdk8
 script: ./ext/travisci/test.sh
 notifications:
   email: false
-  hipchat:
-    rooms:
-      secure: CfGS3yYsocLruSP0lRr9HFwzdZ1HFw4rFEVdJkP/i0i8aIPY3XB3vTQNxw/lIBVRDwWHaUfA+xnyK3itCxt0M0UtPDp1BkU6abLr8Apjet/nJJ2icBvQfnpx1hb6xBpoE69vpRiIVewoU69UPFjXdZd2D1BWX58tNbdV9CA8Ezw=
-    template:
-    - ! '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}'
-    - ! 'Change view: %{compare_url}'
-    - ! 'Build details: %{build_url}'
