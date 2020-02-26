@@ -99,6 +99,8 @@
        (let [resp (http-client/get "http://localhost:8180/metrics/v2/list")
              body (parse-response resp)]
          (is (= 200 (:status  resp)))
+         (is (= 403 (get body "status")))
+         (is (nil? (get body "value")))
          (doseq [[namesp mbeans] (get body "value") mbean (keys mbeans)
                  :let [url (str "http://localhost:8180/metrics/v2/read/"
                                 (jolokia-encode (str namesp ":" mbean))
