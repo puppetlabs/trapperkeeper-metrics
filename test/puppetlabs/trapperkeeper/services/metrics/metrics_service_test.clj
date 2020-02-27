@@ -74,7 +74,7 @@
     (with-app-with-config
      app
      services
-     metrics-service-config
+     (assoc-in metrics-service-config [:metrics :metrics-webservice :mbeans :enabled] true)
 
      (testing "metrics service functions"
        (let [svc (app/get-service app :MetricsService)]
@@ -99,6 +99,8 @@
        (let [resp (http-client/get "http://localhost:8180/metrics/v2/list")
              body (parse-response resp)]
          (is (= 200 (:status  resp)))
+         (is (= 403 (get body "status")))
+         (is (nil? (get body "value")))
          (doseq [[namesp mbeans] (get body "value") mbean (keys mbeans)
                  :let [url (str "http://localhost:8180/metrics/v2/read/"
                                 (jolokia-encode (str namesp ":" mbean))
@@ -199,6 +201,18 @@
                 body (parse-response resp)]
             (is (= 403 (get body "status")))))))))
 
+(deftest metrics-v1-endpoint-disabled-by-default
+  (testing "metrics/v1 is disabled by default, returns 404"
+      (with-app-with-config
+       app
+       [jetty9-service/jetty9-service
+        webrouting-service/webrouting-service
+        metrics-service
+        metrics-webservice]
+       metrics-service-config
+        (let [resp (http-client/get "http://localhost:8180/metrics/v1/mbeans")]
+          (is (= 404 (:status resp)))))))
+
 (deftest metrics-endpoint-with-jolokia-disabled-test
   (testing "metrics/v2 returns 404 when Jolokia is not enabled"
     (let [config (assoc-in metrics-service-config [:metrics :metrics-webservice :jolokia :enabled] false)]
@@ -233,10 +247,12 @@
 
 (deftest metrics-endpoint-with-jmx-disabled-test
   (testing "returns data for jvm even when jmx is not enabled"
-    (let [config (assoc metrics-service-config :registries
-                                               {:pl.no.jmx {:reporters
-                                                            {:jmx
-                                                             {:enabled false}}}})]
+    (let [config (-> metrics-service-config
+                     (assoc-in [:metrics :metrics-webservice :mbeans :enabled] true)
+                     (assoc :registries
+                            {:pl.no.jmx {:reporters
+                                         {:jmx
+                                          {:enabled false}}}}))]
       (with-app-with-config
        app
        [jetty9-service/jetty9-service

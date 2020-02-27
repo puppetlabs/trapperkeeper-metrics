@@ -41,6 +41,8 @@
    :debug "true"
    ;; Don't include backtraces in error results returned by the API.
    :allowErrorDetails "false"
+   ;; Used by jolokia-access to match IPv4 and IPv6 to "localhost"
+   :allowDnsReverseLookup "true"
    ;; Load access policy from: resources/jolokia-access.xml
    :policyLocation "classpath:/jolokia-access.xml"
    :mimeType "application/json"})

@@ -2,13 +2,10 @@
 <!-- Jolokia API access policy.
      Docs: https://jolokia.org/reference/html/security.html -->
 <restrict>
-
   <!-- Only allow read operations on JMX MBeans -->
   <commands>
     <command>read</command>
-    <command>list</command>
     <command>version</command>
-    <command>search</command>
   </commands>
 
 </restrict>

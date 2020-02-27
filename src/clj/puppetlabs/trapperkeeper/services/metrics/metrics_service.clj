@@ -60,10 +60,11 @@
    [:WebserverService add-servlet-handler]]
 
   (init [this context]
-    (add-ring-handler this
-                      (core/build-handler (get-route this)))
+    (when (get-in-config [:metrics :metrics-webservice :mbeans :enabled] false)
+      (add-ring-handler this
+                        (core/build-handler (get-route this))))
 
-    (if (get-in-config [:metrics :metrics-webservice :jolokia :enabled] true)
+    (when (get-in-config [:metrics :metrics-webservice :jolokia :enabled] true)
       (let [config (->> (get-in-config [:metrics :metrics-webservice :jolokia :servlet-init-params] {})
                         jolokia/create-servlet-config)
             ;; NOTE: Normally, these route and server lookups would be done by

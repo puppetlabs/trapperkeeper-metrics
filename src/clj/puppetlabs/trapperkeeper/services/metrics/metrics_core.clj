@@ -29,8 +29,12 @@
   {(schema/optional-key :enabled) schema/Bool
    (schema/optional-key :servlet-init-params) jolokia/JolokiaConfig})
 
+(def MbeansApiConfig
+  {(schema/optional-key :enabled) schema/Bool})
+
 (def WebserviceConfig
-  {(schema/optional-key :jolokia) JolokiaApiConfig})
+  {(schema/optional-key :mbeans) MbeansApiConfig
+   (schema/optional-key :jolokia) JolokiaApiConfig})
 
 (def BaseGraphiteReporterConfig
   {:host schema/Str
