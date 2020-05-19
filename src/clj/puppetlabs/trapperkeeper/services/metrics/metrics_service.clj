@@ -61,6 +61,8 @@
 
   (init [this context]
     (when (get-in-config [:metrics :metrics-webservice :mbeans :enabled] false)
+      (log/warn "The v1 metrics endpoint is deprecated and will be removed in a future release."
+                "Use the v2 endpoint instead.")
       (add-ring-handler this
                         (core/build-handler (get-route this))))
 
