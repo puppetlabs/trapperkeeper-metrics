@@ -1,3 +1,22 @@
+## 1.2.3
+
+* [TK-486](https://tickets.puppetlabs.com/browse/TK-486) - Deprecate the v1
+  endpoint, so it can be removed in a future release. Going forward all metrics
+  gathering should go through the v2 endpoint, access to which can be flexibly
+  controlled via jolokia access rules.
+
+## 1.2.2
+
+* Publicly published version of 1.2.1.
+
+## 1.2.1
+
+This is an internal-only release.
+
+* [PE-28468](https://tickets.puppetlabs.com/browse/PE-28468) - Disable the v1
+  metrics endpoint and restrict v2 to localhost-only access, to fix a CVE where
+  sensitive Puppet data could appear in metrics names.
+
 ## 1.2.0
 
 * Update Jolokia to 1.6.0. This was a security release of Jolokia, though we
