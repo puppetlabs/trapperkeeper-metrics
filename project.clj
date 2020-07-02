@@ -15,6 +15,7 @@
 
                  [puppetlabs/kitchensink]
                  [puppetlabs/trapperkeeper]
+                 [puppetlabs/trapperkeeper-authorization]
                  [puppetlabs/ring-middleware]
 
                  [cheshire]

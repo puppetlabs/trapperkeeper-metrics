@@ -8,6 +8,7 @@
             [ring.util.codec :as codec]
             [puppetlabs.http.client.sync :as http-client]
             [puppetlabs.metrics :as metrics]
+            [puppetlabs.trapperkeeper.services.authorization.authorization-service :as authorization-service]
             [puppetlabs.trapperkeeper.services.metrics.metrics-service :refer :all]
             [puppetlabs.trapperkeeper.services.protocols.metrics :as metrics-protocol]
             [schema.test :as schema-test]
@@ -49,6 +50,17 @@
    metrics-service
    metrics-webservice])
 
+(def ssl-opts
+  {:ssl-cert "./dev-resources/ssl/cert.pem"
+   :ssl-key "./dev-resources/ssl/key.pem"
+   :ssl-ca-cert "./dev-resources/ssl/ca.pem"})
+
+(def ssl-webserver-config
+  {:webserver
+   (merge {:ssl-port 8180
+           :ssl-host "0.0.0.0"}
+          ssl-opts)})
+
 (def metrics-service-config
   {:metrics {:server-id "localhost"
              :registries {:pl.test.reg {:reporters {:jmx {:enabled true}}}
@@ -57,6 +69,20 @@
                :host "0.0.0.0"}
    :web-router-service {:puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice
                         "/metrics"}})
+
+(def auth-config
+  {:authorization
+   {:version 1
+    :rules
+    [{:match-request {:path "/metrics/v2/list" :type "path" :method ["get" "head" "post" "put"]}
+      :allow "localhost"
+      :sort-order 500
+      :name "list"}
+     {:match-request {:path "/metrics/v2" :type "path" :method ["get" "head" "post" "put"]}
+      :deny "localhost"
+      :sort-order 500
+      :name "metrics"}]}})
+
 
 (deftest test-metrics-service-error
   (testing "Metrics service throws an error if missing server-id"
@@ -198,6 +224,17 @@
                             "/getLoggerLevel/root"))
                 body (parse-response resp)]
             (is (= 403 (get body "status")))))))))
+
+(deftest metrics-service-with-tk-auth
+  (testing "tk-auth works when included in bootstrap"
+    (with-app-with-config
+      app
+      (conj services authorization-service/authorization-service)
+      (merge metrics-service-config auth-config ssl-webserver-config)
+      (let [resp (http-client/get "https://localhost:8180/metrics/v2/list" ssl-opts)]
+        (is (= 200 (:status resp))))
+      (let [resp (http-client/get "https://localhost:8180/metrics/v2" ssl-opts)]
+        (is (= 403 (:status resp)))))))
 
 (deftest metrics-v1-endpoint-disabled-by-default
   (testing "metrics/v1 is disabled by default, returns 404"

@@ -1,12 +1,14 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-service
   (:require [puppetlabs.trapperkeeper.core :as trapperkeeper]
+            [puppetlabs.trapperkeeper.services.authorization.authorization-service :as tk-auth]
             [puppetlabs.trapperkeeper.services.protocols.metrics :as metrics]
             [puppetlabs.trapperkeeper.services.metrics.metrics-core :as core]
             [puppetlabs.trapperkeeper.services.metrics.jolokia :as jolokia]
             [puppetlabs.trapperkeeper.services :as tk-services]
             [clojure.tools.logging :as log]
             [schema.core :as schema]
-            [puppetlabs.kitchensink.core :as ks]))
+            [puppetlabs.kitchensink.core :as ks]
+            [puppetlabs.trapperkeeper.core :as tk]))
 
 (trapperkeeper/defservice metrics-service
   metrics/MetricsService
@@ -55,9 +57,10 @@
    (get-in-config [:metrics :server-id])))
 
 (trapperkeeper/defservice metrics-webservice
-  [[:ConfigService get-in-config]
-   [:WebroutingService add-ring-handler get-route get-server]
-   [:WebserverService add-servlet-handler]]
+  {:required [[:ConfigService get-in-config]
+              [:WebroutingService add-ring-handler get-route get-server]
+              [:WebserverService add-servlet-handler]]
+   :optional [AuthorizationService]}
 
   (init [this context]
     (when (get-in-config [:metrics :metrics-webservice :mbeans :enabled] false)
@@ -77,11 +80,13 @@
             server (get-server this)
             options (if (nil? server)
                       {:servlet-init-params config}
-                      {:servlet-init-params config :server-id (keyword server)})]
+                      {:servlet-init-params config :server-id (keyword server)})
+            auth-service (tk-services/maybe-get-service this :AuthorizationService)
+            auth-check-fn (if auth-service (partial tk-auth/authorization-check auth-service))]
         (add-servlet-handler
-          (jolokia/create-servlet)
-          route
-          options)))
+         (jolokia/create-servlet auth-check-fn)
+         route
+         options)))
 
     context)
 

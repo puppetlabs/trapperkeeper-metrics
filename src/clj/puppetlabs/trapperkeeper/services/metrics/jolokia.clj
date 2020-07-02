@@ -2,8 +2,10 @@
   "Clojure helpers for constructing and configuring Jolokia servlets."
   (:require [clojure.tools.logging :as log]
             [clojure.walk :as walk]
+            [ring.util.servlet :as ring-servlet]
             [schema.core :as schema])
-  (:import [org.jolokia.config ConfigKey]
+  (:import [javax.servlet.http HttpServletRequest]
+           [org.jolokia.config ConfigKey]
            [org.jolokia.util LogHandler]
            [org.jolokia.http AgentServlet]))
 
@@ -73,11 +75,29 @@
 
 (defn create-servlet
   "Builds a Jolokia Servlet that uses Clojure logging."
-  []
-  (proxy [AgentServlet] []
-    ;; NOTE: An alternative to this method override would be to use defrecord
-    ;; to create a class that can be set as `:logHandlerClass` in the servlet
-    ;; configuration. This requires AOT compilation for the namespace defining
-    ;; the record so that Jolokia can find the resulting class.
-    (createLogHandler [_ _]
-      (create-logger))))
+  [auth-check-fn]
+  (let [check-auth (if auth-check-fn
+                     (fn [^HttpServletRequest request]
+                      (auth-check-fn
+                       (ring-servlet/build-request-map request)))
+                     (fn [^HttpServletRequest request]
+                       {:authorized true :message ""}))]
+    (if auth-check-fn
+      (log/info "Metrics access control using trapperkeeper-authorization is enabled.")
+      (log/warn "Metrics access control using trapperkeeper-authorization is disabled. Add the authorization service to the trapperkeeper bootstrap configuration file to enable it."))
+    (proxy [AgentServlet] []
+     ;; NOTE: An alternative to this method override would be to use defrecord
+     ;; to create a class that can be set as `:logHandlerClass` in the servlet
+     ;; configuration. This requires AOT compilation for the namespace defining
+     ;; the record so that Jolokia can find the resulting class.
+     (createLogHandler [_ _]
+       (create-logger))
+     (service [request response]
+       (let [{:keys [authorized message]} (check-auth request)]
+          (if-not authorized
+            (ring-servlet/update-servlet-response
+             response
+             {:status 403
+              :headers {}
+              :body message})
+            (proxy-super service request response)))))))
