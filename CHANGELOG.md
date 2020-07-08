@@ -1,3 +1,11 @@
+## 1.3.0
+
+* [TK-489](https://tickets.puppetlabs.com/browse/TK-489) - Add
+  trapperkeeper-authorization support. See that project for
+  configuration. The jolokia access configuration still defaults to
+  disallowing remote access, so this needs to be overridden by the user
+  if using tk-authorization.
+
 ## 1.2.3
 
 * [TK-486](https://tickets.puppetlabs.com/browse/TK-486) - Deprecate the v1
