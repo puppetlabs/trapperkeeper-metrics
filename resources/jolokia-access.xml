@@ -3,13 +3,6 @@
      Docs: https://jolokia.org/reference/html/security.html -->
 <restrict>
 
-  <!-- Due to CVE-2020-7943, restrict access to localhost -->
-  <remote>
-    <host>localhost</host>
-    <host>127.0.0.1</host>
-    <host>0:0:0:0:0:0:0:1</host>
-  </remote>
-
   <!-- Only allow read operations on JMX MBeans -->
   <commands>
     <command>read</command>
