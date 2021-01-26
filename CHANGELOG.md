@@ -1,3 +1,9 @@
+## 1.4.0
+
+* [PE-28647](https://tickets.puppetlabs.com/browse/PE-28647) - Allow
+  remote connections to the v2 metrics endpoint now that the connection
+  can be authenticated.
+
 ## 1.3.0
 
 * [TK-489](https://tickets.puppetlabs.com/browse/TK-489) - Add
