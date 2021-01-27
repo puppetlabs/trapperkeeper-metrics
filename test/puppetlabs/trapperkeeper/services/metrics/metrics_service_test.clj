@@ -122,12 +122,12 @@
                  :let [resp (http-client/get (str "http://localhost:8180/metrics/v1" path))]]
            (is (= 200 (:status resp)))))
 
-       (let [resp (http-client/get "http://localhost:8180/metrics/v2/list")
+       (let [resp (http-client/get "http://localhost:8180/metrics/v2/list/java.lang")
              body (parse-response resp)]
          (is (= 200 (:status  resp)))
-         (doseq [[namesp mbeans] (get body "value") mbean (keys mbeans)
+         (doseq [mbean (keys (get body "value"))
                  :let [url (str "http://localhost:8180/metrics/v2/read/"
-                                (jolokia-encode (str namesp ":" mbean))
+                                (jolokia-encode (str "java.lang:" mbean))
                                 ;; NOTE: Some memory pools intentionally don't
                                 ;; implement MBean attributes. This results
                                 ;; in an error being thrown when those
