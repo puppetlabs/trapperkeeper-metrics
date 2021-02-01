@@ -2,11 +2,11 @@
   :description "Trapperkeeper Metrics Service"
   :url "http://github.com/puppetlabs/trapperkeeper-metrics"
 
-  :min-lein-version "2.7.1"
+  :min-lein-version "2.9.1"
 
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "1.7.26"]
+  :parent-project {:coords [puppetlabs/clj-parent "4.6.17"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
@@ -28,10 +28,11 @@
                  [io.dropwizard.metrics/metrics-graphite]
                  [org.jolokia/jolokia-core "1.6.2"]
                  [puppetlabs/comidi]
+                 [org.bouncycastle/bcpkix-jdk15on]
                  [puppetlabs/i18n]]
 
   :plugins [[puppetlabs/i18n "0.6.0"]
-            [lein-parent "0.3.1"]]
+            [lein-parent "0.3.7"]]
 
   :source-paths  ["src/clj"]
   :java-source-paths  ["src/java"]

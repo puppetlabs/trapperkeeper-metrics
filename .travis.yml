@@ -1,8 +1,8 @@
 language: clojure
-lein: 2.7.1
+lein: 2.9.1
 matrix:
   include:
     - jdk: openjdk8
-script: ./ext/travisci/test.sh
+script: "lein test"
 notifications:
   email: false
