@@ -1,3 +1,8 @@
+## 1.4.1
+
+* Update Jolokia to 1.7.0. This is a routine maintenance bump that includes some
+  cleanup of reflective accesses that trigger warnings in Java 9 and newer.
+
 ## 1.4.0
 
 * [PE-28647](https://tickets.puppetlabs.com/browse/PE-28647) - Allow
