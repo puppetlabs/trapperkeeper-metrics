@@ -28,7 +28,6 @@
                  [io.dropwizard.metrics/metrics-graphite]
                  [org.jolokia/jolokia-core "1.7.0"]
                  [puppetlabs/comidi]
-                 [org.bouncycastle/bcpkix-jdk15on]
                  [puppetlabs/i18n]]
 
   :plugins [[puppetlabs/i18n "0.6.0"]
@@ -44,15 +43,36 @@
 
   :classifiers  [["test" :testutils]]
 
-  :profiles {:dev {:aliases {"ring-example"
-                             ["trampoline" "run"
-                              "-b" "./examples/ring_app/bootstrap.cfg"
-                              "-c" "./examples/ring_app/ring-example.conf"]}
-                   :source-paths ["examples/ring_app/src"]
-                   :dependencies [[puppetlabs/http-client]
-                                  [puppetlabs/trapperkeeper :classifier "test"]
-                                  [puppetlabs/trapperkeeper-webserver-jetty9]
-                                  [puppetlabs/kitchensink :classifier "test"]]}
+  :profiles {:defaults {:dependencies [[puppetlabs/http-client]
+                                       [puppetlabs/trapperkeeper :classifier "test"]
+                                       [puppetlabs/trapperkeeper-webserver-jetty9]
+                                       [puppetlabs/kitchensink :classifier "test"]]
+                        :resource-paths ["dev-resources"]}
+
+             :dev [:defaults
+                   {:dependencies [[org.bouncycastle/bcpkix-jdk15on]]}]
+
+             :fips [:defaults
+                    {:dependencies [[org.bouncycastle/bcpkix-fips]
+                                    [org.bouncycastle/bc-fips]
+                                    [org.bouncycastle/bctls-fips]]
+                     :jvm-opts ~(let [version (System/getProperty "java.specification.version")
+                                      [major minor _] (clojure.string/split version #"\.")
+                                      unsupported-ex (ex-info "Unsupported major Java version. Expects 8 or 11."
+                                                        {:major major
+                                                         :minor minor})]
+                                   (condp = (java.lang.Integer/parseInt major)
+                                     1 (if (= 8 (java.lang.Integer/parseInt minor))
+                                         ["-Djava.security.properties==./dev-resources/java.security.jdk8-fips"]
+                                         (throw unsupported-ex))
+                                     11 ["-Djava.security.properties==./dev-resources/java.security.jdk11-fips"]
+                                     (throw unsupported-ex)))}]
+
+             ;; per https://github.com/technomancy/leiningen/issues/1907
+             ;; the provided profile is necessary for lein jar / lein install
+             :provided {:dependencies [[org.bouncycastle/bcpkix-jdk15on]]
+                        :resource-paths ["dev-resources"]}
+
              :testutils {:source-paths ^:replace ["test"]
                          :java-source-paths ^:replace []}}
 

@@ -1,3 +1,7 @@
+## 1.4.2
+
+* Update project specification to work correctly in FIPS mode.
+
 ## 1.4.1
 
 * Update Jolokia to 1.7.0. This is a routine maintenance bump that includes some
