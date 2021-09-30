@@ -81,12 +81,21 @@
             options (if (nil? server)
                       {:servlet-init-params config}
                       {:servlet-init-params config :server-id (keyword server)})
-            auth-service (tk-services/maybe-get-service this :AuthorizationService)
-            auth-check-fn (if auth-service (partial tk-auth/authorization-check auth-service))]
-        (add-servlet-handler
-         (jolokia/create-servlet auth-check-fn)
-         route
-         options)))
+            require-auth? (get-in-config [:metrics :metrics-webservice :jolokia :require-auth] true)]
+        (if-not require-auth?
+          (add-servlet-handler (jolokia/create-servlet nil) route options)
+          (try
+            (let [auth-service (tk-services/get-service this :AuthorizationService)
+                  auth-check-fn (partial tk-auth/authorization-check auth-service)
+                  servlet (jolokia/create-servlet auth-check-fn)]
+              (add-servlet-handler servlet route options))
+            ;; Fail fast when auth is required but the auth service could not load
+            (catch IllegalArgumentException e
+              (log/error "metrics.metrics-webservice.jolokia.require-auth set to true (default)"
+                         "but trapperkeeper-authorization service was not found. To disable"
+                         "authorization change this setting to false.")
+              (throw e))))))
+
 
     context)
 

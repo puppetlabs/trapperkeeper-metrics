@@ -84,7 +84,10 @@
                        {:authorized true :message ""}))]
     (if auth-check-fn
       (log/info "Metrics access control using trapperkeeper-authorization is enabled.")
-      (log/warn "Metrics access control using trapperkeeper-authorization is disabled. Add the authorization service to the trapperkeeper bootstrap configuration file to enable it."))
+      (log/warn (str "Metrics access control using trapperkeeper-authorization is disabled. "
+                     "To enable it, add the authorization service to the trapperkeeper bootstrap "
+                     "configuration file and set the trapperkeeper-metrics config setting "
+                     "metrics.metrics-webservice.jolokia.require-auth to true (default).")))
     (proxy [AgentServlet] []
      ;; NOTE: An alternative to this method override would be to use defrecord
      ;; to create a class that can be set as `:logHandlerClass` in the servlet

@@ -80,6 +80,10 @@ metrics: {
             # Default is true.
             enabled: false
 
+            # Enable or disable authorization for metrics endpoint
+            # Default is true.
+            require-auth: true
+
             # Configure any of the settings listed at:
             #   https://jolokia.org/reference/html/agents.html#war-agent-installation
             servlet-init-params: {
