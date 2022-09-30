@@ -1,4 +1,4 @@
-(defproject puppetlabs/trapperkeeper-metrics "1.4.4-SNAPSHOT"
+(defproject puppetlabs/trapperkeeper-metrics "1.5.0-SNAPSHOT"
   :description "Trapperkeeper Metrics Service"
   :url "http://github.com/puppetlabs/trapperkeeper-metrics"
 
@@ -6,7 +6,7 @@
 
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "4.9.4"]
+  :parent-project {:coords [puppetlabs/clj-parent "5.2.6"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
@@ -50,7 +50,7 @@
                         :resource-paths ["dev-resources"]}
 
              :dev [:defaults
-                   {:dependencies [[org.bouncycastle/bcpkix-jdk15on]]}]
+                   {:dependencies [[org.bouncycastle/bcpkix-jdk18on]]}]
 
              :fips [:defaults
                     {:dependencies [[org.bouncycastle/bcpkix-fips]
@@ -70,7 +70,7 @@
 
              ;; per https://github.com/technomancy/leiningen/issues/1907
              ;; the provided profile is necessary for lein jar / lein install
-             :provided {:dependencies [[org.bouncycastle/bcpkix-jdk15on]]
+             :provided {:dependencies [[org.bouncycastle/bcpkix-jdk18on]]
                         :resource-paths ["dev-resources"]}
 
              :testutils {:source-paths ^:replace ["test"]
