@@ -1,3 +1,7 @@
+## 1.5.0
+
+* update clj-parent to 5.2.6 to allow use of bouncy-castle libs `18on` that replaced the `15on` naming 
+
 ## 1.4.3 (1.4.2 release failed, do not use)
 
 * Update project specification to work correctly in FIPS mode.
