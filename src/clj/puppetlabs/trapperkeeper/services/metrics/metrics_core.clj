@@ -5,19 +5,19 @@
            (java.util.concurrent TimeUnit)
            (java.net InetSocketAddress)
            (com.codahale.metrics.graphite Graphite GraphiteSender))
-  (:require [clojure.tools.logging :as log]
+  (:require [cheshire.core :as json]
             [clojure.java.io :as io]
-            [cheshire.core :as json]
-            [schema.core :as schema]
-            [ring.middleware.defaults :as ring-defaults]
             [puppetlabs.comidi :as comidi]
-            [puppetlabs.ring-middleware.utils :as ringutils]
-            [puppetlabs.trapperkeeper.services.metrics.metrics-utils
-             :as metrics-utils]
-            [puppetlabs.trapperkeeper.services.metrics.jolokia
-             :as jolokia]
+            [puppetlabs.i18n.core :as i18n :refer [tru]]
             [puppetlabs.kitchensink.core :as ks]
-            [puppetlabs.i18n.core :as i18n :refer [trs tru]]))
+            [puppetlabs.ring-middleware.utils :as ringutils]
+            [puppetlabs.trapperkeeper.services.metrics.jolokia :as jolokia]
+            [puppetlabs.trapperkeeper.services.metrics.metrics-utils :as metrics-utils]
+            [ring.middleware.content-type :as ring-content-type]
+            [ring.middleware.keyword-params :as ring-keyword-params]
+            [ring.middleware.not-modified :as ring-not-modified]
+            [ring.middleware.params :as ring-params]
+            [schema.core :as schema]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Schemas
@@ -303,6 +303,16 @@
       (stop metrics-registry))
     service-context))
 
+(schema/defn ^:always-validate default-middleware
+  []
+  (fn [handler]
+    (-> handler
+        (ring-keyword-params/wrap-keyword-params {:parse-namespaces? true})
+        (ring-params/wrap-params)
+        (ring-not-modified/wrap-not-modified)
+        (ring-content-type/wrap-content-type)
+        (i18n/locale-negotiator))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Comidi
 
@@ -348,4 +358,4 @@
                       (ringutils/json-response 200 mbean)
                       (ringutils/json-response 404
                                                (tru "No mbean ''{0}'' found" name)))))))))
-    (comp i18n/locale-negotiator #(ring-defaults/wrap-defaults % ring-defaults/api-defaults)))))
+    (default-middleware))))

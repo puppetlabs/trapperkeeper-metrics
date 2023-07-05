@@ -6,7 +6,7 @@
 
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "5.2.6"]
+  :parent-project {:coords [puppetlabs/clj-parent "6.0.1"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
