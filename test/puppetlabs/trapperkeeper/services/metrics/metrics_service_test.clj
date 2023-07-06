@@ -13,7 +13,7 @@
             [puppetlabs.trapperkeeper.services.protocols.metrics :as metrics-protocol]
             [schema.test :as schema-test]
             [puppetlabs.trapperkeeper.services.webrouting.webrouting-service :as webrouting-service]
-            [puppetlabs.trapperkeeper.services.webserver.jetty9-service :as jetty9-service]
+            [puppetlabs.trapperkeeper.services.webserver.jetty10-service :as jetty10-service]
             [puppetlabs.trapperkeeper.testutils.bootstrap :refer [with-app-with-config]]
             [puppetlabs.trapperkeeper.testutils.logging :refer [with-test-logging]]
             [puppetlabs.trapperkeeper.app :as app]
@@ -45,7 +45,7 @@
   (ks/absolute-path "./dev-resources/puppetlabs/trapperkeeper/services/metrics/metrics_service_test"))
 
 (def services
-  [jetty9-service/jetty9-service
+  [jetty10-service/jetty10-service
    webrouting-service/webrouting-service
    metrics-service
    metrics-webservice])
@@ -240,7 +240,7 @@
   (testing "metrics/v1 is disabled by default, returns 404"
       (with-app-with-config
        app
-       [jetty9-service/jetty9-service
+       [jetty10-service/jetty10-service
         webrouting-service/webrouting-service
         metrics-service
         metrics-webservice]
@@ -253,7 +253,7 @@
     (let [config (assoc-in metrics-service-config [:metrics :metrics-webservice :jolokia :enabled] false)]
       (with-app-with-config
        app
-       [jetty9-service/jetty9-service
+       [jetty10-service/jetty10-service
         webrouting-service/webrouting-service
         metrics-service
         metrics-webservice]
@@ -268,7 +268,7 @@
                            (str "file://" test-resources-dir "/jolokia-access-permissive.xml"))]
       (with-app-with-config
        app
-       [jetty9-service/jetty9-service
+       [jetty10-service/jetty10-service
         webrouting-service/webrouting-service
         metrics-service
         metrics-webservice]
@@ -290,7 +290,7 @@
                                           {:enabled false}}}}))]
       (with-app-with-config
        app
-       [jetty9-service/jetty9-service
+       [jetty10-service/jetty10-service
         webrouting-service/webrouting-service
         metrics-service
         metrics-webservice]
