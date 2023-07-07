@@ -1,3 +1,6 @@
+## 2.0.0
+* major breaking change to Jetty 10 using the trapperkeeper-webserver-jetty10 service.
+
 ## 1.5.0
 
 * update clj-parent to 5.2.6 to allow use of bouncy-castle libs `18on` that replaced the `15on` naming 

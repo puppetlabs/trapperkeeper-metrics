@@ -2,9 +2,9 @@
 
 This example demonstrates how to incorporate the trapperkeeper-metrics
 service into a simple Ring app.  This is based loosely upon the
-[ring_app example] (https://github.com/puppetlabs/trapperkeeper-webserver-jetty9/tree/master/examples/ring_app)
-in the trapperkeeper-webserver-jetty9 project.  See that example for more
-information on the use of the `jetty9-service` and the Jetty web server
+[ring_app example] (https://github.com/puppetlabs/trapperkeeper-webserver-jetty10/tree/master/examples/ring_app)
+in the trapperkeeper-webserver-jetty10 project.  See that example for more
+information on the use of the `jetty10-service` and the Jetty web server
 integration with Ring.
 
 All code needed to execute this example is located in `./src/examples/ring_app`.
@@ -74,13 +74,13 @@ this:
 ~~~~
 puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice
 puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-service
-puppetlabs.trapperkeeper.services.webserver.jetty9-service/jetty9-service
+puppetlabs.trapperkeeper.services.webserver.jetty10-service/jetty10-service
 puppetlabs.trapperkeeper.services.webrouting.webrouting-service/webrouting-service
 examples.ring-app.ring-app/count-service
 ~~~~
 
 This configuration indicates that the metrics services, `WebserverService` and
-`WebroutingService` from the `trapperkeeper-webserver-jetty9` project, and the
+`WebroutingService` from the `trapperkeeper-webserver-jetty10` project, and the
 count service, defined in the `ring_app.clj` file, are to be loaded.
 
 ### The `ring-example.conf` configuration file
