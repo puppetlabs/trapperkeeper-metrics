@@ -43,7 +43,7 @@
 
   :profiles {:defaults {:dependencies [[puppetlabs/http-client]
                                        [puppetlabs/trapperkeeper :classifier "test"]
-                                       [com.puppetlabs/trapperkeeper-webserver-jetty10 "1.0.1" :exclusions [org.ow2.asm/asm]]
+                                       [com.puppetlabs/trapperkeeper-webserver-jetty10 "1.0.8"]
                                        [puppetlabs/kitchensink :classifier "test"]]
                         :resource-paths ["dev-resources"]}
 
