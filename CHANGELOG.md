@@ -1,3 +1,6 @@
+## 2.0.2
+* pin ring-middleware to 2.0.2 until it's safe to move clj-parent to jetty10.
+
 ## 2.0.1
 * update tk-jetty-10 to 1.0.8 to address broken ring handler getRequestCharacterEncoding() function and set default character encoding of ring handler responses to UTF-8.
 

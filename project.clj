@@ -16,7 +16,7 @@
                  [puppetlabs/kitchensink]
                  [puppetlabs/trapperkeeper]
                  [puppetlabs/trapperkeeper-authorization]
-                 [puppetlabs/ring-middleware]
+                 [puppetlabs/ring-middleware "2.0.2"]
 
                  [cheshire]
                  [org.clojure/java.jmx]
