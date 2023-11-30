@@ -1,3 +1,6 @@
+## 2.0.1
+* update tk-jetty-10 to 1.0.8 to address broken ring handler getRequestCharacterEncoding() function and set default character encoding of ring handler responses to UTF-8.
+
 ## 2.0.0
 * major breaking change to Jetty 10 using the trapperkeeper-webserver-jetty10 service.
 
