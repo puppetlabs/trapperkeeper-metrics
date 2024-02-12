@@ -1,4 +1,10 @@
 ## 2.0.1
+* update clj-parent to 7.3.6 to allow the version of tk-jetty-10 to be managed
+* update the version of i18n to 0.9.2
+* update the version of lein-parent to 0.3.9
+* update the dependencies to avoid mixing maps and keys in vectors as this is deprecated by lein
+
+## 2.0.1
 * update tk-jetty-10 to 1.0.8 to address broken ring handler getRequestCharacterEncoding() function and set default character encoding of ring handler responses to UTF-8.
 
 ## 2.0.0
