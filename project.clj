@@ -1,6 +1,8 @@
 (defproject puppetlabs/trapperkeeper-metrics "2.0.3-SNAPSHOT"
   :description "Trapperkeeper Metrics Service"
   :url "http://github.com/puppetlabs/trapperkeeper-metrics"
+  :license {:name "Apache License, Version 2.0"
+              :url "http://www.apache.org/licenses/LICENSE-2.0.html"}
 
   :min-lein-version "2.9.1"
 
