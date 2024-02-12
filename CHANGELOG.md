@@ -1,4 +1,7 @@
-## 2.0.1
+## 2.0.3
+* add the license key to project.clj to allow promotion to clojars 
+
+## 2.0.2 -- not released to clojars due to license key misssing
 * update clj-parent to 7.3.6 to allow the version of tk-jetty-10 to be managed
 * update the version of i18n to 0.9.2
 * update the version of lein-parent to 0.3.9
