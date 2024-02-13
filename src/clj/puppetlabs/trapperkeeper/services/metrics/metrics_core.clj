@@ -27,6 +27,7 @@
 
 (def JolokiaApiConfig
   {(schema/optional-key :enabled) schema/Bool
+   (schema/optional-key :require-auth) schema/Bool
    (schema/optional-key :servlet-init-params) jolokia/JolokiaConfig})
 
 (def MbeansApiConfig

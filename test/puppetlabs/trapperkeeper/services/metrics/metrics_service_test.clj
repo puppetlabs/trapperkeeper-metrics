@@ -63,6 +63,7 @@
 
 (def metrics-service-config
   {:metrics {:server-id "localhost"
+             :metrics-webservice {:jolokia {:require-auth false}}
              :registries {:pl.test.reg {:reporters {:jmx {:enabled true}}}
                           :pl.other.reg {:reporters {:jmx {:enabled true}}}}}
    :webserver {:port 8180
@@ -226,15 +227,31 @@
             (is (= 403 (get body "status")))))))))
 
 (deftest metrics-service-with-tk-auth
-  (testing "tk-auth works when included in bootstrap"
-    (with-app-with-config
-      app
-      (conj services authorization-service/authorization-service)
-      (merge metrics-service-config auth-config ssl-webserver-config)
-      (let [resp (http-client/get "https://localhost:8180/metrics/v2/list" ssl-opts)]
-        (is (= 200 (:status resp))))
-      (let [resp (http-client/get "https://localhost:8180/metrics/v2" ssl-opts)]
-        (is (= 403 (:status resp)))))))
+  (let [config-with-require-auth
+        (-> (merge metrics-service-config auth-config ssl-webserver-config)
+          (assoc-in [:metrics :metrics-webservice :jolokia :require-auth] true))]
+
+    (testing "tk-auth works when included in bootstrap"
+      (with-app-with-config
+        app
+        (conj services authorization-service/authorization-service)
+        ;; This test requires authentication so we need to override the require-auth
+        ;; option that is set to false in metrics-service-config
+        config-with-require-auth
+        (let [resp (http-client/get "https://localhost:8180/metrics/v2/list" ssl-opts)]
+          (is (= 200 (:status resp))))
+        (let [resp (http-client/get "https://localhost:8180/metrics/v2" ssl-opts)]
+          (is (= 403 (:status resp))))))
+
+    (testing "exception occurs when require-auth option is true but auth service was not found"
+      ;; This test is like the previous, except the auth service is not listed as a dependency
+      (is (thrown-with-msg? IllegalArgumentException
+                            #"service ':AuthorizationService' does not exist"
+                            (with-app-with-config
+                              app
+                              ;; The auth service is purposefully left out here
+                              services
+                              config-with-require-auth))))))
 
 (deftest metrics-v1-endpoint-disabled-by-default
   (testing "metrics/v1 is disabled by default, returns 404"
