@@ -46,8 +46,7 @@
   :profiles {:defaults {:dependencies [[puppetlabs/http-client]
                                        [puppetlabs/trapperkeeper :classifier "test"]
                                        [com.puppetlabs/trapperkeeper-webserver-jetty10]
-                                       [puppetlabs/kitchensink :classifier "test"]]
-                        :resource-paths ["dev-resources"]}
+                                       [puppetlabs/kitchensink :classifier "test"]]}
              :dev-dependencies {:dependencies [[org.bouncycastle/bcpkix-jdk18on]]}
              :dev [:defaults :dev-dependencies]
              :fips-dependencies {:dependencies [[org.bouncycastle/bcpkix-fips]
@@ -70,8 +69,7 @@
 
              ;; per https://github.com/technomancy/leiningen/issues/1907
              ;; the provided profile is necessary for lein jar / lein install
-             :provided {:dependencies [[org.bouncycastle/bcpkix-jdk18on]]
-                        :resource-paths ["dev-resources"]}
+             :provided {:dependencies [[org.bouncycastle/bcpkix-jdk18on]]}
 
              :testutils {:source-paths ^:replace ["test"]
                          :java-source-paths ^:replace []}}
