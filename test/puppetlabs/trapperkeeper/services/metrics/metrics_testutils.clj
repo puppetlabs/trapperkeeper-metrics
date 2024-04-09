@@ -1,6 +1,7 @@
 (ns puppetlabs.trapperkeeper.services.metrics.metrics-testutils
   (:import (com.codahale.metrics.graphite GraphiteSender))
-  (:require [schema.core :as schema]))
+  (:require [schema.core :as schema]
+            [clojure.set]))
 
 (def graphite-config
   {:graphite
